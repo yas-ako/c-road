@@ -1,8 +1,10 @@
 <template>
-  <main
-    class="game-board gap-[2px] grid grid-cols-[repeat(15,minmax(0,1fr))] w-[90vmin] h-[90vmin] max-h-96 max-w-96 flex-grow mx-auto"
-  >
-    <div v-for="i in new Array(225)" class="grid-item"></div>
+  <main class="mx-4 overflow-scroll flex-grow">
+    <div
+      class="game-board gap-[2px] grid grid-cols-[repeat(15,minmax(0,1fr))] w-[160vmin] h-[160vmin] mx-auto max-w-5xl max-h-[64rem]"
+    >
+      <div v-for="i in new Array(225)" class="shadow-sm grid-item"></div>
+    </div>
   </main>
 </template>
 
@@ -10,7 +12,7 @@
 
 <style>
 .game-board {
-  background-color: #e6e6e6;
+  background-color: #f4f5f7;
 }
 
 /* .grid-item { */
