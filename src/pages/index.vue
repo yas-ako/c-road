@@ -1,4 +1,6 @@
 <template>
-  <TheHeader />
-  <BoardMain />
+  <div>
+    <TheHeader />
+    <BoardMain />
+  </div>
 </template>

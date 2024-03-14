@@ -1,9 +1,9 @@
 <template>
-  <main class="mx-4 overflow-scroll flex-grow">
+  <main class="mx-4 flex-grow overflow-scroll">
     <div
-      class="game-board gap-[2px] grid grid-cols-[repeat(15,minmax(0,1fr))] w-[160vmin] h-[160vmin] mx-auto max-w-5xl max-h-[64rem]"
+      class="game-board mx-auto grid h-[160vmin] max-h-[64rem] w-[160vmin] max-w-5xl grid-cols-[repeat(15,minmax(0,1fr))] gap-[2px]"
     >
-      <div v-for="i in new Array(225)" :key="i" class="shadow-sm grid-item">
+      <div v-for="i in new Array(225)" :key="i" class="grid-item shadow-sm">
         <div>{{ i }}</div>
       </div>
     </div>
