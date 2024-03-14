@@ -8,15 +8,15 @@ module.exports = {
     "eslint:recommended",
     "@nuxtjs/eslint-config-typescript",
     "@vue/prettier",
+    "prettier",
   ],
   overrides: [],
-  parser: "@typescript-eslint/parser",
+  parser: "vue-eslint-parser",
   parserOptions: {
+    parser: "@typescript-eslint/parser",
     ecmaVersion: "latest",
     sourceType: "module",
   },
   plugins: ["vue", "@typescript-eslint"],
-  rules: {},
+  rules: { "vue/no-v-model-argument": 0 },
 };
-
-// https://zenn.dev/kigi/scraps/a2e38ff5bb0889
