@@ -1,6 +1,3 @@
 <template>
-  <div>
-    <TheHeader />
-    <BoardMain />
-  </div>
+  <BoardMain />
 </template>

@@ -1,5 +1,5 @@
 <template>
-  <div class="flex h-full w-full" @click="changeColor">
+  <div class="flex h-full w-full select-none" @click="changeColor">
     <div
       class="mx-auto my-auto flex h-5/6 w-5/6 cursor-grab border-[0.5vmin]"
       :class="cellColor"
