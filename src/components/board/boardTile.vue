@@ -1,7 +1,10 @@
 <template>
   <div class="flex h-full w-full" @click="changeColor">
-    <div class="mx-auto my-auto flex h-5/6 w-5/6 border-2" :class="cellColor">
-      <div class="mx-auto my-auto">24</div>
+    <div
+      class="mx-auto my-auto flex h-5/6 w-5/6 cursor-grab border-[0.5vmin]"
+      :class="cellColor"
+    >
+      <div class="mx-auto my-auto text-[min(4.2vmin,30px)]">24</div>
     </div>
   </div>
 </template>
@@ -9,9 +12,9 @@
 <script setup>
   const cellColor = ref("cell_none");
   function changeColor() {
-    if (cellColor.value == "cell_none") {
+    if (cellColor.value === "cell_none") {
       cellColor.value = "cell_blue";
-    } else if (cellColor.value == "cell_blue") {
+    } else if (cellColor.value === "cell_blue") {
       cellColor.value = "cell_red";
     } else {
       cellColor.value = "cell_blue";

@@ -3,9 +3,17 @@
     <div
       class="game-board mx-auto grid h-[160vmin] max-h-[64rem] w-[160vmin] max-w-5xl grid-cols-[repeat(15,minmax(0,1fr))]"
     >
-      <div v-for="i in new Array(225)" :key="i" class="grid-item">
-        <BoardTile />
-      </div>
+      <!-- <div
+        v-for="i in new Array(225)"
+        :key="i"
+        class="grid-item border-gray-240 border-[1px]"
+      > -->
+      <!-- <BoardTile /> -->
+      <BoardTile
+        v-for="i in new Array(225)"
+        :key="i"
+        class="grid-item border-gray-240 border-[1px]"
+      />
     </div>
   </main>
 </template>
