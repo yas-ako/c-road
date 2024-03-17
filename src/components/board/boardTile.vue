@@ -45,6 +45,7 @@
     --red-color-dark: #8a2b1e;
     --red-color-light: #f5a89e;
     --gray-color: #f4f5f7;
+    --path-width: var(--path-width);
   }
 
   .cell {
@@ -82,20 +83,56 @@
       background-color: #ffffff00;
     }
 
+    &__0 {
+      clip-path: polygon(0 0, 7% 0, 27% 20%, 20% 27%, 0 7%);
+    }
+
     &__1 {
-      clip-path: polygon(45% 0, 55% 0, 55% 10%, 45% 10%);
+      clip-path: polygon(
+        calc(50% - var(--path-width) / 2) 0,
+        calc(50% + var(--path-width) / 2) 0,
+        calc(50% + var(--path-width) / 2) 10%,
+        calc(50% - var(--path-width) / 2) 10%
+      );
+    }
+
+    &__2 {
+      clip-path: polygon(100% 0, 93% 0, 73% 20%, 80% 27%, 100% 7%);
     }
 
     &__3 {
-      clip-path: polygon(0 45%, 10% 45%, 10% 55%, 0 55%);
+      clip-path: polygon(
+        0 calc(50% - var(--path-width) / 2),
+        var(--path-width) calc(50% - var(--path-width) / 2),
+        var(--path-width) calc(50% + var(--path-width) / 2),
+        0 calc(50% + var(--path-width) / 2)
+      );
     }
 
     &__5 {
-      clip-path: polygon(100% 45%, 90% 45%, 90% 55%, 100% 55%);
+      clip-path: polygon(
+        100% calc(50% - var(--path-width) / 2),
+        90% calc(50% - var(--path-width) / 2),
+        90% calc(50% + var(--path-width) / 2),
+        100% calc(50% + var(--path-width) / 2)
+      );
+    }
+
+    &__6 {
+      clip-path: polygon(0 100%, 7% 100%, 27% 80%, 20% 73%, 0% 93%);
     }
 
     &__7 {
-      clip-path: polygon(45% 100%, 55% 100%, 55% 90%, 45% 90%);
+      clip-path: polygon(
+        calc(50% - var(--path-width) / 2) 100%,
+        calc(50% + var(--path-width) / 2) 100%,
+        calc(50% + var(--path-width) / 2) 90%,
+        calc(50% - var(--path-width) / 2) 90%
+      );
+    }
+
+    &__8 {
+      clip-path: polygon(100% 100%, 93% 100%, 73% 80%, 80% 73%, 100% 93%);
     }
   }
 </style>
