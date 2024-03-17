@@ -1,13 +1,17 @@
 <template>
+  <!-- タップできるが見えない枠 -->
   <div class="relative flex h-full w-full select-none" @click="changeColor">
+    <!-- 背景色が青と赤に変わる部分 -->
     <div
       class="z-10 mx-auto my-auto flex h-5/6 w-5/6 cursor-grab border-[0.5vmin]"
       :class="cellColor"
     >
+      <!-- 数字 -->
       <div class="z-20 mx-auto my-auto text-[min(4.2vmin,30px)]">24</div>
     </div>
+    <!-- まわりに伸びる道(8本用意する, 4は無し) -->
     <div
-      v-for="i in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]"
+      v-for="i in [0, 1, 2, 3, 5, 6, 7, 8]"
       :key="i"
       class="absolute z-0 h-full w-full"
       :class="
@@ -21,8 +25,8 @@
   </div>
 </template>
 
-<script setup>
-  const cellColor = ref("cell_none");
+<script lang="ts" setup>
+  const cellColor: "cell_none" | "cell_blue" | "cell_red" = ref("cell_none");
   function changeColor() {
     if (cellColor.value === "cell_none") {
       cellColor.value = "cell_blue";
@@ -84,6 +88,10 @@
 
     &__3 {
       clip-path: polygon(0 45%, 10% 45%, 10% 55%, 0 55%);
+    }
+
+    &__5 {
+      clip-path: polygon(100% 45%, 90% 45%, 90% 55%, 100% 55%);
     }
 
     &__7 {
