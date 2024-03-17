@@ -26,7 +26,7 @@
 </template>
 
 <script lang="ts" setup>
-  const cellColor: "cell_none" | "cell_blue" | "cell_red" = ref("cell_none");
+  const cellColor = ref("cell_none");
   function changeColor() {
     if (cellColor.value === "cell_none") {
       cellColor.value = "cell_blue";
