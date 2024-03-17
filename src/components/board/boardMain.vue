@@ -16,11 +16,12 @@
       />
     </div>
   </main>
+  <boardMenu />
 </template>
 
 <script setup></script>
 
-<style>
+<style scoped>
   .game-board {
     background-color: #f4f5f7;
   }
