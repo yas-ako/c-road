@@ -12,7 +12,7 @@
       <BoardTile
         v-for="i in new Array(225)"
         :key="i"
-        class="grid-item border-gray-240 border-[0.2vmin]"
+        class="grid-item border-gray-240 border-[min(0.2vmin,2.048px)]"
       />
     </div>
   </main>
