@@ -84,7 +84,13 @@
     }
 
     &__0 {
-      clip-path: polygon(0 0, 7% 0, 27% 20%, 20% 27%, 0 7%);
+      clip-path: polygon(
+        0 0,
+        calc(0.705 * var(--path-width)) 0,
+        calc(20% + 0.705 * var(--path-width)) 20%,
+        20% calc(20% + 0.705 * var(--path-width)),
+        0 calc(0.705 * var(--path-width))
+      );
     }
 
     &__1 {
@@ -97,14 +103,20 @@
     }
 
     &__2 {
-      clip-path: polygon(100% 0, 93% 0, 73% 20%, 80% 27%, 100% 7%);
+      clip-path: polygon(
+        100% 0,
+        calc(100% - 0.705 * var(--path-width)) 0,
+        calc(80% - 0.705 * var(--path-width)) 20%,
+        80% calc(20% + 0.705 * var(--path-width)),
+        100% calc(0.705 * var(--path-width))
+      );
     }
 
     &__3 {
       clip-path: polygon(
         0 calc(50% - var(--path-width) / 2),
-        var(--path-width) calc(50% - var(--path-width) / 2),
-        var(--path-width) calc(50% + var(--path-width) / 2),
+        10% calc(50% - var(--path-width) / 2),
+        10% calc(50% + var(--path-width) / 2),
         0 calc(50% + var(--path-width) / 2)
       );
     }
@@ -119,7 +131,13 @@
     }
 
     &__6 {
-      clip-path: polygon(0 100%, 7% 100%, 27% 80%, 20% 73%, 0% 93%);
+      clip-path: polygon(
+        0 100%,
+        calc(0.705 * var(--path-width)) 100%,
+        calc(20% + 0.705 * var(--path-width)) 80%,
+        20% calc(80% - 0.705 * var(--path-width)),
+        0% calc(100% - 0.705 * var(--path-width))
+      );
     }
 
     &__7 {
@@ -132,7 +150,13 @@
     }
 
     &__8 {
-      clip-path: polygon(100% 100%, 93% 100%, 73% 80%, 80% 73%, 100% 93%);
+      clip-path: polygon(
+        100% 100%,
+        calc(100% - 0.705 * var(--path-width)) 100%,
+        calc(80% - 0.705 * var(--path-width)) 80%,
+        80% calc(80% - 0.705 * var(--path-width)),
+        100% calc(100% - 0.705 * var(--path-width))
+      );
     }
   }
 </style>
