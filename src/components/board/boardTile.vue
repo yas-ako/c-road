@@ -45,7 +45,7 @@
     --red-color-dark: #8a2b1e;
     --red-color-light: #f5a89e;
     --gray-color: #f4f5f7;
-    --path-width: var(--path-width);
+    --path-width: 10%;
   }
 
   .cell {
