@@ -1,4 +1,3 @@
 <template>
-  <TheHeader />
   <BoardMain />
 </template>
