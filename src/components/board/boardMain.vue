@@ -19,7 +19,12 @@
   <boardMenu />
 </template>
 
-<script setup></script>
+<script setup lang="ts">
+  const cellData = ref<number[][]>(
+    [...Array(13)].map((_) => Array(13).fill(0)),
+  );
+  console.log(cellData.value);
+</script>
 
 <style scoped>
   .game-board {
