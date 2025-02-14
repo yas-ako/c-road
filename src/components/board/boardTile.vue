@@ -7,7 +7,9 @@
       :class="cellColor"
     >
       <!-- 数字 -->
-      <div class="z-20 mx-auto my-auto text-[min(4.2vmin,30px)]">24</div>
+      <div class="z-20 mx-auto my-auto text-[min(4.2vmin,30px)]">
+        {{ cellNumber.number }}
+      </div>
     </div>
     <!-- まわりに伸びる道(8本用意する, 4は無し) -->
     <div
@@ -26,6 +28,12 @@
 </template>
 
 <script lang="ts" setup>
+  interface Props {
+    number: number;
+  }
+
+  const cellNumber = defineProps<Props>();
+
   const cellColor = ref("cell_none");
   function changeColor() {
     if (cellColor.value === "cell_none") {
