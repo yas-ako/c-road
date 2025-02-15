@@ -1,5 +1,5 @@
 <template>
-  <main class="mx-4 flex-grow overflow-scroll">
+  <main class="mx-4 h-[100dvh] flex-grow overflow-scroll">
     <div
       class="game-board mx-auto grid h-[160vmin] max-h-[64rem] w-[160vmin] max-w-5xl grid-cols-[repeat(15,minmax(0,1fr))]"
     >
