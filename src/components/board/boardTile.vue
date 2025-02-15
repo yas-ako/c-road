@@ -40,17 +40,30 @@
     // 13*13の二次元配列
     cellData: number[][];
   }
-
   const tileProps = defineProps<Props>();
+
+  interface Emits {
+    // nweCellData [x, y, newNumber]
+    (event: "updateCellNumber", newCellData: [number, number, number]): void;
+  }
+  const tileEmits = defineEmits<Emits>();
 
   const cellColor = ref("cell_none");
   function changeColor() {
     if (cellColor.value === "cell_none") {
       cellColor.value = "cell_blue";
-    } else if (cellColor.value === "cell_blue") {
-      cellColor.value = "cell_red";
     } else {
-      cellColor.value = "cell_blue";
+      tileEmits("updateCellNumber", [
+        cellX(tileProps.number),
+        cellY(tileProps.number),
+        tileProps.cellData[cellX(tileProps.number)][cellY(tileProps.number)] +
+          1,
+      ]);
+      if (cellColor.value === "cell_blue") {
+        cellColor.value = "cell_red";
+      } else {
+        cellColor.value = "cell_blue";
+      }
     }
   }
 
@@ -143,6 +156,8 @@
           nextCellNumber !== 0
         ) {
           nextCells.value[key] = true;
+        } else {
+          nextCells.value[key] = false;
         }
       }
     }

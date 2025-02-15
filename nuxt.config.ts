@@ -3,6 +3,10 @@ export default defineNuxtConfig({
   // devtools: { enabled: true },
   devtools: { enabled: false },
 
+  vue: {
+    propsDestructure: true,
+  },
+
   srcDir: "src",
   modules: ["@nuxtjs/tailwindcss"],
   ssr: false,
