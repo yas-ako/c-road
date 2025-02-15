@@ -1,6 +1,6 @@
 <template>
   <!-- タップできるが見えない枠 -->
-  <div class="relative flex h-full w-full select-none" @click="changeColor">
+  <div class="relative flex h-full w-full select-none" @click="clickTile">
     <!-- 背景色が青と赤に変わる部分 -->
     <div
       class="z-10 mx-auto my-auto flex h-5/6 w-5/6 cursor-grab border-[min(0.5vmin,2.5px)]"
@@ -12,7 +12,11 @@
         class="z-20 mx-auto my-auto text-[min(4.2vmin,27px)]"
       >
         {{
-          tileProps.cellData[cellX(tileProps.number)][cellY(tileProps.number)]
+          Math.abs(
+            tileProps.cellData[cellX(tileProps.number)][
+              cellY(tileProps.number)
+            ],
+          )
         }}
       </div>
     </div>
@@ -49,22 +53,21 @@
   const tileEmits = defineEmits<Emits>();
 
   const cellColor = ref("cell_none");
-  function changeColor() {
-    if (cellColor.value === "cell_none") {
-      cellColor.value = "cell_blue";
-    } else {
-      tileEmits("updateCellNumber", [
-        cellX(tileProps.number),
-        cellY(tileProps.number),
-        tileProps.cellData[cellX(tileProps.number)][cellY(tileProps.number)] +
-          1,
-      ]);
-      if (cellColor.value === "cell_blue") {
-        cellColor.value = "cell_red";
-      } else {
-        cellColor.value = "cell_blue";
-      }
-    }
+  function clickTile() {
+    // if (cellColor.value === "cell_none") {
+    //   cellColor.value = "cell_blue";
+    // } else {
+    tileEmits("updateCellNumber", [
+      cellX(tileProps.number),
+      cellY(tileProps.number),
+      tileProps.cellData[cellX(tileProps.number)][cellY(tileProps.number)] * -1,
+    ]);
+    //   if (cellColor.value === "cell_blue") {
+    //     cellColor.value = "cell_red";
+    //   } else {
+    //     cellColor.value = "cell_blue";
+    //   }
+    // }
   }
 
   /**
@@ -130,6 +133,16 @@
    */
   const nextCells = ref<boolean[]>(new Array(8).fill(false));
   watchEffect(() => {
+    const cellNo =
+      tileProps.cellData[cellX(tileProps.number)][cellY(tileProps.number)];
+    if (cellNo > 0) {
+      cellColor.value = "cell_blue";
+    } else if (cellNo < 0) {
+      cellColor.value = "cell_red";
+    } else {
+      cellColor.value = "cell_none";
+    }
+
     const directions: { [key: number]: [number, number] } = {
       0: [-1, -1], // 左上
       1: [0, -1], // 上
