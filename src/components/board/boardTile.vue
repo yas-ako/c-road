@@ -35,7 +35,9 @@
 
 <script lang="ts" setup>
   interface Props {
+    // 1~225の数字の番号
     number: number;
+    // 13*13の二次元配列
     cellData: number[][];
   }
 
@@ -130,8 +132,11 @@
       if (Object.prototype.hasOwnProperty.call(directions, key)) {
         const [x, y] = [cellX(tileProps.number), cellY(tileProps.number)];
         const [dx, dy] = directions[key];
+
+        // 13を足してから13で割ったあまりをとることで，隣のマスが盤面をはみ出した時，反対側のマス目を参照参照するようにした
         const nextX = (x + dx + 13) % 13;
         const nextY = (y + dy + 13) % 13;
+
         const nextCellNumber = tileProps.cellData[nextX][nextY];
         if (
           Math.abs(tileProps.cellData[x][y] - nextCellNumber) <= 1 &&
