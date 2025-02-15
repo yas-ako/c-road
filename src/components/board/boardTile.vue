@@ -3,13 +3,13 @@
   <div class="relative flex h-full w-full select-none" @click="changeColor">
     <!-- 背景色が青と赤に変わる部分 -->
     <div
-      class="z-10 mx-auto my-auto flex h-5/6 w-5/6 cursor-grab border-[min(0.5vmin,5.12px)]"
+      class="z-10 mx-auto my-auto flex h-5/6 w-5/6 cursor-grab border-[min(0.5vmin,2.5px)]"
       :class="cellColor"
     >
       <!-- 数字 -->
       <div
         v-if="cellData"
-        class="z-20 mx-auto my-auto text-[min(4.2vmin,30px)]"
+        class="z-20 mx-auto my-auto text-[min(4.2vmin,27px)]"
       >
         {{
           tileProps.cellData[cellX(tileProps.number)][cellY(tileProps.number)]
