@@ -2,10 +2,14 @@
 export default defineNuxtConfig({
   // devtools: { enabled: true },
   devtools: { enabled: false },
+
   srcDir: "src",
   modules: ["@nuxtjs/tailwindcss"],
   ssr: false,
+
   typescript: {
     typeCheck: true,
   },
+
+  compatibilityDate: "2025-02-15",
 });
