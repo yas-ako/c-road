@@ -7,8 +7,13 @@
       :class="cellColor"
     >
       <!-- 数字 -->
-      <div class="z-20 mx-auto my-auto text-[min(4.2vmin,30px)]">
-        {{ cellNumber.number }}
+      <div
+        v-if="cellData"
+        class="z-20 mx-auto my-auto text-[min(4.2vmin,30px)]"
+      >
+        {{
+          tileProps.cellData[cellX(tileProps.number)][cellY(tileProps.number)]
+        }}
       </div>
     </div>
     <!-- まわりに伸びる道(8本用意する, 4は無し) -->
@@ -30,9 +35,10 @@
 <script lang="ts" setup>
   interface Props {
     number: number;
+    cellData: number[][];
   }
 
-  const cellNumber = defineProps<Props>();
+  const tileProps = defineProps<Props>();
 
   const cellColor = ref("cell_none");
   function changeColor() {
@@ -43,6 +49,58 @@
     } else {
       cellColor.value = "cell_blue";
     }
+  }
+
+  /**
+   * セルの番号(0~255)をもとに，どのマス目を指すか求める．x座標
+   * @param no セルの番号(0~255)
+   */
+  function cellX(no: number): number {
+    const result = remainder(no, 15);
+    let index: number;
+    if (result === 0) {
+      index = 13;
+    } else if (result === 14) {
+      index = 1;
+    } else {
+      index = result;
+    }
+    return index - 1; // 0～12 に調整
+  }
+
+  /**
+   * セルの番号(0~255)をもとに，どのマス目を指すか求める．x座標
+   * @param no セルの番号(0~255)
+   */
+  function cellY(no: number): number {
+    const result = quotient(no, 15);
+    let index: number;
+    if (result === 0) {
+      index = 13;
+    } else if (result === 14) {
+      index = 1;
+    } else {
+      index = result;
+    }
+    return index - 1; // 0～12 に調整
+  }
+
+  /**
+   * 商を求める関数
+   * @param dividend 割られる数
+   * @param divisor 割る数
+   */
+  function quotient(dividend: number, divisor: number): number {
+    return Math.floor(dividend / divisor);
+  }
+
+  /**
+   * 余りを求める関数
+   * @param dividend 割られる数
+   * @param divisor 割る数
+   */
+  function remainder(dividend: number, divisor: number): number {
+    return dividend % divisor;
   }
 </script>
 
