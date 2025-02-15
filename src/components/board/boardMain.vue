@@ -15,6 +15,7 @@
         class="grid-item border-gray-240 border-[min(0.2vmin,2.048px)]"
         :number="index"
         :cell-data="cellData"
+        @update-cell-number="updateCellData"
       />
     </div>
   </main>
@@ -31,6 +32,11 @@
       cellData.value[i][j] = 13 * j + i;
     }
   }
+
+  const updateCellData = (newcellData: [number, number, number]): void => {
+    const [x, y, newCellNumber] = newcellData;
+    cellData.value[x][y] = newCellNumber;
+  };
 </script>
 
 <style scoped>

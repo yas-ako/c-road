@@ -1,54 +1,73 @@
 <template>
   <!-- タップできるが見えない枠 -->
-  <div class="relative flex h-full w-full select-none" @click="changeColor">
+  <div class="relative flex h-full w-full select-none" @click="clickTile">
     <!-- 背景色が青と赤に変わる部分 -->
     <div
-      class="z-10 mx-auto my-auto flex h-5/6 w-5/6 cursor-grab border-[min(0.5vmin,5.12px)]"
+      class="z-10 mx-auto my-auto flex h-5/6 w-5/6 cursor-grab border-[min(0.5vmin,2.5px)]"
       :class="cellColor"
     >
       <!-- 数字 -->
       <div
         v-if="cellData"
-        class="z-20 mx-auto my-auto text-[min(4.2vmin,30px)]"
+        class="z-20 mx-auto my-auto text-[min(4.2vmin,27px)]"
       >
         {{
-          tileProps.cellData[cellX(tileProps.number)][cellY(tileProps.number)]
+          Math.abs(
+            tileProps.cellData[cellX(tileProps.number)][
+              cellY(tileProps.number)
+            ],
+          )
         }}
       </div>
     </div>
     <!-- まわりに伸びる道(8本用意する, 4は無し) -->
-    <div
-      v-for="i in [0, 1, 2, 3, 5, 6, 7, 8]"
-      :key="i"
-      class="absolute z-0 h-full w-full"
-      :class="
-        cellColor === 'cell_blue'
-          ? 'path_blue path__' + i
-          : cellColor === 'cell_red'
-            ? 'path_red path__' + i
-            : 'path_none'
-      "
-    ></div>
+    <template v-for="i in [0, 1, 2, 3, 5, 6, 7, 8]" :key="i">
+      <div
+        v-if="nextCells[i]"
+        class="absolute z-0 h-full w-full"
+        :class="
+          cellColor === 'cell_blue'
+            ? 'path_blue path__' + i
+            : cellColor === 'cell_red'
+              ? 'path_red path__' + i
+              : 'path_none'
+        "
+      ></div>
+    </template>
   </div>
 </template>
 
 <script lang="ts" setup>
   interface Props {
+    // 1~225の数字の番号
     number: number;
+    // 13*13の二次元配列
     cellData: number[][];
   }
-
   const tileProps = defineProps<Props>();
 
+  interface Emits {
+    // nweCellData [x, y, newNumber]
+    (event: "updateCellNumber", newCellData: [number, number, number]): void;
+  }
+  const tileEmits = defineEmits<Emits>();
+
   const cellColor = ref("cell_none");
-  function changeColor() {
-    if (cellColor.value === "cell_none") {
-      cellColor.value = "cell_blue";
-    } else if (cellColor.value === "cell_blue") {
-      cellColor.value = "cell_red";
-    } else {
-      cellColor.value = "cell_blue";
-    }
+  function clickTile() {
+    // if (cellColor.value === "cell_none") {
+    //   cellColor.value = "cell_blue";
+    // } else {
+    tileEmits("updateCellNumber", [
+      cellX(tileProps.number),
+      cellY(tileProps.number),
+      tileProps.cellData[cellX(tileProps.number)][cellY(tileProps.number)] * -1,
+    ]);
+    //   if (cellColor.value === "cell_blue") {
+    //     cellColor.value = "cell_red";
+    //   } else {
+    //     cellColor.value = "cell_blue";
+    //   }
+    // }
   }
 
   /**
@@ -102,6 +121,60 @@
   function remainder(dividend: number, divisor: number): number {
     return dividend % divisor;
   }
+
+  /**
+   * 周囲の8マスのうち，つながっているマスの番号が代入されている配列
+   *
+   * ```
+   * 0  1  2
+   * 3  -  5
+   * 6  7  8
+   * ```
+   */
+  const nextCells = ref<boolean[]>(new Array(8).fill(false));
+  watchEffect(() => {
+    const cellNo =
+      tileProps.cellData[cellX(tileProps.number)][cellY(tileProps.number)];
+    if (cellNo > 0) {
+      cellColor.value = "cell_blue";
+    } else if (cellNo < 0) {
+      cellColor.value = "cell_red";
+    } else {
+      cellColor.value = "cell_none";
+    }
+
+    const directions: { [key: number]: [number, number] } = {
+      0: [-1, -1], // 左上
+      1: [0, -1], // 上
+      2: [1, -1], // 右上
+      3: [-1, 0], // 左
+      5: [1, 0], // 右
+      6: [-1, 1], // 左下
+      7: [0, 1], // 下
+      8: [1, 1], // 右下
+    };
+
+    for (const key in directions) {
+      if (Object.prototype.hasOwnProperty.call(directions, key)) {
+        const [x, y] = [cellX(tileProps.number), cellY(tileProps.number)];
+        const [dx, dy] = directions[key];
+
+        // 13を足してから13で割ったあまりをとることで，隣のマスが盤面をはみ出した時，反対側のマス目を参照参照するようにした
+        const nextX = (x + dx + 13) % 13;
+        const nextY = (y + dy + 13) % 13;
+
+        const nextCellNumber = tileProps.cellData[nextX][nextY];
+        if (
+          Math.abs(tileProps.cellData[x][y] - nextCellNumber) <= 1 &&
+          nextCellNumber !== 0
+        ) {
+          nextCells.value[key] = true;
+        } else {
+          nextCells.value[key] = false;
+        }
+      }
+    }
+  });
 </script>
 
 <style lang="scss">
