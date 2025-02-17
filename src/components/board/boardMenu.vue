@@ -92,6 +92,7 @@
           isEditable,
         'cursor-default bg-slate-100 text-slate-300 ': !isEditable,
       }"
+      @click="clickSubmitButton()"
     >
       <svg
         class="m-auto justify-center fill-current"
@@ -128,13 +129,23 @@
      */
     isEditable: boolean;
   }
-
   const menuPorps = defineProps<Props>();
 
+  interface Emits {
+    (event: "submitButtonOnClickEmits", submittedNumber: number): void;
+  }
+  const submitButtonOnClickEmits = defineEmits<Emits>();
   /**
    * スライダーでユーザーが選んだ数値
    */
   const selectedNumber = ref(1);
+
+  function clickSubmitButton() {
+    if (!menuPorps.isEditable) {
+      return;
+    }
+    submitButtonOnClickEmits("submitButtonOnClickEmits", selectedNumber.value);
+  }
 </script>
 
 <style lang="scss" scoped>

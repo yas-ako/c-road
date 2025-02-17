@@ -24,10 +24,14 @@
     :selected-cell-number="selectedCellNumber"
     :max-cell-number="maxCellNumber"
     :is-editable="isEditable"
+    @submit-button-on-click-emits="submitButtonOnClick"
   />
 </template>
 
 <script setup lang="ts" scoped>
+  /**
+   * 13*13 のマス目データ 初期値は0
+   */
   const cellData = ref<number[][]>(
     [...Array(13)].map((_) => Array(13).fill(0)),
   );
@@ -38,6 +42,10 @@
   //   }
   // }
 
+  /**
+   * 選択されているセルの値
+   * `[-1, -1]` の時は選択されていないとき
+   */
   const selectedCell = ref([-1, -1]);
   const selectedCellNumber = ref(
     selectedCell.value[0] >= 0
@@ -45,6 +53,9 @@
       : 1000,
   );
 
+  /**
+   * boradTile から呼び出されるEmmits
+   */
   const clickTile = (clickTileData: [number, number]): void => {
     // 同じマスが二度クリックされたとき
     if (
@@ -57,17 +68,31 @@
       // クリックされたセルの座標を代入
       [selectedCell.value[0], selectedCell.value[1]] = clickTileData;
     }
-    console.debug(selectedCell.value[0], selectedCell.value[1]);
-    console.debug(selectedCell.value[0] !== -1 && selectedCell.value[1] !== -1);
-    console.debug(isEditable.value);
   };
 
+  /**
+   * セルが選択されているかどうか(数値を入力できるかどうか)
+   */
   const isEditable = ref<boolean>(false);
+
+  // 選択されているセルが変わるごとに isEditable に値を代入する
   watchEffect(() => {
     isEditable.value =
       selectedCell.value[0] !== -1 && selectedCell.value[1] !== -1;
   });
+
+  /**
+   * 選択されているセルに入力できる値の最大値
+   */
   const maxCellNumber = ref(1);
+
+  /**
+   * boardMenu からのEmitsがここに来る
+   */
+  const submitButtonOnClick = (submittedNumber: number): void => {
+    cellData.value[selectedCell.value[0]][selectedCell.value[1]] =
+      submittedNumber;
+  };
 </script>
 
 <style scoped>
