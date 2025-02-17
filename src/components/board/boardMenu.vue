@@ -1,19 +1,47 @@
 <template>
   <div class="flex h-[40dvh] min-h-28 items-stretch justify-between">
     <div class="flex w-full justify-between">
-      <div class="w-10">
-        <button>-</button>
+      <div class="mx-4 flex justify-center">
+        <button
+          class="my-auto rounded-md border-solid bg-slate-200 fill-current hover:bg-gray-400"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            height="30px"
+            viewBox="0 -960 960 960"
+            width="30px"
+          >
+            <path d="M200-440v-80h560v80H200Z" />
+          </svg>
+        </button>
       </div>
-      <div class="flex h-full">
+      <div class="grid h-full w-full grid-flow-row gap-3">
+        <div class="min-mt-3 mt-[4dvh] text-center text-3xl">13</div>
         <input
           type="range"
-          class="input-range my-auto justify-center"
+          class="input-range min-mb-4 mb-[5dvh]"
           name="number_input"
           min="0"
           max="10"
+          step="1"
         />
       </div>
-      <button class="w-10">+</button>
+      <div class="mx-4 flex justify-center">
+        <button
+          class="my-auto rounded-md border-solid bg-slate-200 fill-current hover:bg-gray-400"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            height="30px"
+            viewBox="0 -960 960 960"
+            width="30px"
+          >
+            <path
+              d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"
+            />
+          </svg>
+        </button>
+      </div>
     </div>
     <button
       class="flex aspect-square w-16 items-stretch border-lime-400 bg-lime-400 text-lime-800 hover:bg-lime-500 active:bg-lime-600 lg:min-w-[20vw]"
@@ -36,8 +64,8 @@
     -webkit-appearance: none; // スタイルリセット
     appearance: none;
     cursor: pointer;
-    background: #ffffff; // 背景
-    height: 35px; // バーの高さ
+    background: rgb(163 230 53); // 背景
+    height: 5px; // バーの高さ
     width: 100%; // スライダーの幅
     border: solid 3px rgb(163 230 53); // バーまわりの線
     outline: 0; /* アウトラインを消して代わりにfocusのスタイルをあてる */
@@ -50,17 +78,17 @@
     // -webkit-向けのつまみ
     &::-webkit-slider-thumb {
       -webkit-appearance: none; // デフォルトのつまみのスタイルを解除
-      background: rgb(163 230 53); // 背景色
+      background: #4a7505; // 背景色
       width: 10px; // 幅
-      height: 25px; // 高さ
-      border-radius: 30%; // 円形に
+      height: 35px; // 高さ
+      border-radius: 0%; // 円形に
     }
     // -moz-向けのつまみ
     &::-moz-range-thumb {
-      background: rgb(163 230 53); // 背景色
+      background: #4a7505; // 背景色
       width: 10px; // 幅
-      height: 25px; // 高さ
-      border-radius: 30%; // 円形に
+      height: 35px; // 高さ
+      border-radius: 0%; // 円形に
       border: none; // デフォルトの線を消す
     }
     // Firefoxで点線が周りに表示されてしまう問題の解消
