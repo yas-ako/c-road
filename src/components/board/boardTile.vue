@@ -2,7 +2,7 @@
   <!-- タップできるが見えない枠 -->
   <div
     class="relative flex h-full w-full select-none"
-    :class="{ 'bg-slate-300 text-slate-300': isInEdge(tileProps.number) }"
+    :class="{ 'border-gray-200 text-slate-200': isInEdge(tileProps.number) }"
     @click="clickTile"
   >
     <!-- 背景色が青と赤に変わる部分 -->
@@ -11,10 +11,7 @@
       :class="cellColor"
     >
       <!-- 数字 -->
-      <div
-        v-if="cellData"
-        class="z-20 mx-auto my-auto text-[min(4.2vmin,27px)]"
-      >
+      <div v-if="cellData" class="z-5 mx-auto my-auto text-[min(4.2vmin,27px)]">
         {{
           Math.abs(
             tileProps.cellData[cellX(tileProps.number)][
@@ -39,6 +36,12 @@
         "
       ></div>
     </template>
+
+    <!-- 端のセルの網掛け -->
+    <div
+      v-if="isInEdge(tileProps.number)"
+      class="absolute z-10 h-full w-full bg-white bg-opacity-60"
+    ></div>
   </div>
 </template>
 

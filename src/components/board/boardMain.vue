@@ -1,7 +1,7 @@
 <template>
   <main class="mx-4 flex-grow overflow-scroll">
     <div
-      class="game-board mx-auto grid h-[160vmin] max-h-[64rem] w-[160vmin] max-w-5xl grid-cols-[repeat(15,minmax(0,1fr))]"
+      class="game-board mx-auto grid h-[160vmin] max-h-[64rem] w-[160vmin] max-w-5xl grid-cols-[repeat(15,minmax(0,1fr))] border border-gray-300"
     >
       <!-- <div
         v-for="i in new Array(225)"
@@ -12,7 +12,7 @@
       <BoardTile
         v-for="(n, index) in 225"
         :key="index"
-        class="grid-item border-gray-240 border-[min(0.2vmin,2.048px)]"
+        class="grid-item border-[min(0.2vmin,2.048px)] border-white"
         :number="index"
         :cell-data="cellData"
         :selected-cell="selectedCell"
@@ -116,7 +116,7 @@
 
 <style scoped>
   .game-board {
-    background-color: #f4f5f7;
+    background-color: #e7e7e7;
   }
   /* .grid-item { */
   /* background-color: #c0c0c0; */
