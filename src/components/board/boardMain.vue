@@ -56,6 +56,7 @@
   const selectedCell = ref([-1, -1]);
   const selectedCellNumber = ref<number>(0);
   watchEffect(() => {
+    // どのセルも選択されていないとき，セルの値を1000とする
     selectedCellNumber.value =
       selectedCell.value[0] >= 0
         ? cellData.value[selectedCell.value[0]][selectedCell.value[1]]
@@ -67,8 +68,8 @@
    * boradTile から呼び出されるEmmits
    */
   const clickTile = (clickTileData: [number, number]): void => {
-    // 同じマスが二度クリックされたとき
     if (
+      // 同じマスが二度クリックされたとき
       selectedCell.value[0] === clickTileData[0] &&
       selectedCell.value[1] === clickTileData[1]
     ) {
@@ -89,9 +90,8 @@
   watchEffect(() => {
     console.debug("isEditableのためのwatchEffect");
     console.debug("selectedCellNumber.value", selectedCellNumber.value);
-    // 選択されたセルに入っている値が0であるときのみ
-    // if (selectedCellNumber.value === 0) {
-    //   }
+
+    // 選択されたセルが存在する かつ 選択されたセルに入っている値が0である ときのみ true に
     isEditable.value =
       selectedCell.value[0] !== -1 &&
       selectedCell.value[1] !== -1 &&
