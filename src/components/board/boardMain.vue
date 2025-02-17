@@ -15,7 +15,7 @@
         class="grid-item border-gray-240 border-[min(0.2vmin,2.048px)]"
         :number="index"
         :cell-data="cellData"
-        @update-cell-number="updateCellData"
+        @click-tile-emits="clickTile"
       />
     </div>
   </main>
@@ -37,15 +37,26 @@
   //   }
   // }
 
-  const updateCellData = (newcellData: [number, number, number]): void => {
-    const [x, y, newCellNumber] = newcellData;
-    cellData.value[x][y] = newCellNumber;
-  };
-
-  const selectedCell = ref([3, 5]);
+  const selectedCell = ref([-1, -1]);
   const selectedCellNumber = ref(
-    cellData.value[selectedCell.value[0]][selectedCell.value[1]],
+    selectedCell.value[0] >= 0
+      ? cellData.value[selectedCell.value[0]][selectedCell.value[1]]
+      : 1000,
   );
+
+  const clickTile = (clickTileData: [number, number]): void => {
+    // 同じマスが二度クリックされたとき
+    if (
+      selectedCell.value[0] === clickTileData[0] &&
+      selectedCell.value[1] == clickTileData[1]
+    ) {
+      // 選択解除
+      selectedCell.value = [-1, -1];
+    } else {
+      // クリックされたセルの座標を代入
+      [selectedCell.value[0], selectedCell.value[1]] = clickTileData;
+    }
+  };
 
   const maxCellNumber = ref(1);
 </script>
@@ -58,10 +69,10 @@
   /* background-color: #c0c0c0; */
   /* } */
 
-  .grid-item:nth-child(-n + 15),
+  /* .grid-item:nth-child(-n + 15),
   .grid-item:nth-child(15n + 1),
   .grid-item:nth-child(15n + 15),
   .grid-item:nth-last-child(-n + 15) {
     background-color: #d6d6d6;
-  }
+  } */
 </style>

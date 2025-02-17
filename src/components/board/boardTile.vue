@@ -1,6 +1,10 @@
 <template>
   <!-- タップできるが見えない枠 -->
-  <div class="relative flex h-full w-full select-none" @click="clickTile">
+  <div
+    class="relative flex h-full w-full select-none"
+    :class="{ 'bg-slate-300 text-slate-300': isInEdge(tileProps.number) }"
+    @click="clickTile"
+  >
     <!-- 背景色が青と赤に変わる部分 -->
     <div
       class="z-10 mx-auto my-auto flex h-5/6 w-5/6 cursor-grab border-[min(0.5vmin,2.5px)]"
@@ -18,6 +22,7 @@
             ],
           )
         }}
+        <!-- {{ tileProps.number }} -->
       </div>
     </div>
     <!-- まわりに伸びる道(8本用意する, 4は無し) -->
@@ -38,6 +43,23 @@
 </template>
 
 <script lang="ts" setup scoped>
+  const isInEdge = (n: number) => {
+    // 0~14の範囲にあるか
+    if (n >= 0 && n <= 14) return true;
+
+    // 15で割って14余る数か
+    if (n % 15 === 14) return true;
+
+    // 15の倍数か
+    if (n % 15 === 0) return true;
+
+    // 211~225の範囲にあるか
+    if (n >= 210 && n <= 224) return true;
+
+    // いずれの条件にも当てはまらない場合
+    return false;
+  };
+
   interface Props {
     // 1~225の数字の番号
     number: number;
@@ -48,7 +70,7 @@
 
   interface Emits {
     // nweCellData [x, y, newNumber]
-    (event: "updateCellNumber", newCellData: [number, number, number]): void;
+    (event: "clickTileEmits", clickTileData: [number, number]): void;
   }
   const tileEmits = defineEmits<Emits>();
 
@@ -57,10 +79,13 @@
     // if (cellColor.value === "cell_none") {
     //   cellColor.value = "cell_blue";
     // } else {
-    tileEmits("updateCellNumber", [
+    tileEmits("clickTileEmits", [
+      // x座標
       cellX(tileProps.number),
+      // y座標
       cellY(tileProps.number),
-      tileProps.cellData[cellX(tileProps.number)][cellY(tileProps.number)] * -1,
+      // 現時点で保存されている数値
+      // tileProps.cellData[cellX(tileProps.number)][cellY(tileProps.number)],
     ]);
     //   if (cellColor.value === "cell_blue") {
     //     cellColor.value = "cell_red";
