@@ -16,6 +16,7 @@
         :number="index"
         :cell-data="cellData"
         :selected-cell="selectedCell"
+        :side="side"
         @click-tile-emits="clickTile"
       />
     </div>

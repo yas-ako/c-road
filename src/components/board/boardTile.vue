@@ -71,8 +71,16 @@
      */
     cellData: number[][];
 
-    /** */
+    /**
+     * 選択されたセルの座標 [x, y]
+     */
     selectedCell: number[];
+
+    /**
+     * 手番
+     * 1:青　-1:赤
+     */
+    side: number;
   }
   const tileProps = defineProps<Props>();
 
@@ -98,19 +106,19 @@
       cellY(tileProps.number),
     ]);
 
-    // すでに値が入っているセルは選択できない
-    if (
-      tileProps.cellData[tileProps.selectedCell[0]][
-        tileProps.selectedCell[1]
-      ] === 0
-    ) {
-      if (
-        tileProps.selectedCell[0] === cellX(tileProps.number) &&
-        tileProps.selectedCell[1] === cellY(tileProps.number)
-      ) {
-        cellColor.value = "cell_red_selected";
-      }
-    }
+    // // すでに値が入っているセルは選択できない
+    // if (
+    //   tileProps.cellData[tileProps.selectedCell[0]][
+    //     tileProps.selectedCell[1]
+    //   ] === 0
+    // ) {
+    //   if (
+    //     tileProps.selectedCell[0] === cellX(tileProps.number) &&
+    //     tileProps.selectedCell[1] === cellY(tileProps.number)
+    //   ) {
+    //     cellColor.value = "cell_red_selected";
+    // }
+    // }
   }
 
   /**
@@ -165,6 +173,10 @@
     return dividend % divisor;
   }
 
+  //   watch(() => props.value, (newValue, oldValue) => {
+  //   console.log(`値が変わりました: ${oldValue} → ${newValue}`);
+  // });
+
   /**
    * 周囲の8マスのうち，つながっているマスの番号が代入されている配列
    *
@@ -175,17 +187,38 @@
    * ```
    */
   const nextCells = ref<boolean[]>(new Array(8).fill(false));
+
   watchEffect(() => {
     cellNumber.value =
       tileProps.cellData[cellX(tileProps.number)][cellY(tileProps.number)];
-    if (cellNumber.value > 0) {
+    if (
+      tileProps.selectedCell[0] === cellX(tileProps.number) &&
+      tileProps.selectedCell[1] === cellY(tileProps.number) &&
+      tileProps.cellData[tileProps.selectedCell[0]][
+        tileProps.selectedCell[1]
+      ] === 0
+    ) {
+      // セルが選択されている場合
+      if (tileProps.side === 1) {
+        // 青の時
+        cellColor.value = "cell_blue_selected";
+      } else {
+        // 赤の時
+        cellColor.value = "cell_red_selected";
+      }
+    } else if (cellNumber.value > 0) {
+      // セルが選択されておらず，青の時
       cellColor.value = "cell_blue";
     } else if (cellNumber.value < 0) {
+      // セルが選択されておらず，赤の時
       cellColor.value = "cell_red";
     } else {
+      // セルが選択されておらず，ゼロの時
       cellColor.value = "cell_none";
     }
+  });
 
+  watchEffect(() => {
     const directions: { [key: number]: [number, number] } = {
       0: [-1, -1], // 左上
       1: [0, -1], // 上
