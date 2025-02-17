@@ -129,12 +129,17 @@
      */
     isEditable: boolean;
   }
+
+  /**
+   * boardMainから受け取るデータ
+   */
   const menuPorps = defineProps<Props>();
 
   interface Emits {
     (event: "submitButtonOnClickEmits", submittedNumber: number): void;
   }
   const submitButtonOnClickEmits = defineEmits<Emits>();
+
   /**
    * スライダーでユーザーが選んだ数値
    */

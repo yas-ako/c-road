@@ -75,6 +75,9 @@
   const tileEmits = defineEmits<Emits>();
 
   const cellColor = ref("cell_none");
+
+  const cellNumber = ref<number>();
+
   function clickTile() {
     // if (cellColor.value === "cell_none") {
     //   cellColor.value = "cell_blue";
@@ -158,11 +161,11 @@
    */
   const nextCells = ref<boolean[]>(new Array(8).fill(false));
   watchEffect(() => {
-    const cellNo =
+    cellNumber.value =
       tileProps.cellData[cellX(tileProps.number)][cellY(tileProps.number)];
-    if (cellNo > 0) {
+    if (cellNumber.value > 0) {
       cellColor.value = "cell_blue";
-    } else if (cellNo < 0) {
+    } else if (cellNumber.value < 0) {
       cellColor.value = "cell_red";
     } else {
       cellColor.value = "cell_none";

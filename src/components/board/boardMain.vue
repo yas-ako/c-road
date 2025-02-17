@@ -30,6 +30,12 @@
 
 <script setup lang="ts" scoped>
   /**
+   * 手番
+   * 1:青，-1:赤
+   */
+  const side = ref<number>(1);
+
+  /**
    * 13*13 のマス目データ 初期値は0
    */
   const cellData = ref<number[][]>(
@@ -84,14 +90,15 @@
   /**
    * 選択されているセルに入力できる値の最大値
    */
-  const maxCellNumber = ref(1);
+  const maxCellNumber = ref(10);
 
   /**
    * boardMenu からのEmitsがここに来る
    */
   const submitButtonOnClick = (submittedNumber: number): void => {
     cellData.value[selectedCell.value[0]][selectedCell.value[1]] =
-      submittedNumber;
+      submittedNumber * side.value;
+    side.value = side.value * -1;
   };
 </script>
 
