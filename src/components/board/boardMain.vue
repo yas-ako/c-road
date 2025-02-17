@@ -48,7 +48,7 @@
     // 同じマスが二度クリックされたとき
     if (
       selectedCell.value[0] === clickTileData[0] &&
-      selectedCell.value[1] == clickTileData[1]
+      selectedCell.value[1] === clickTileData[1]
     ) {
       // 選択解除
       selectedCell.value = [-1, -1];
