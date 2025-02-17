@@ -23,6 +23,7 @@
     :selected-cell="selectedCell"
     :selected-cell-number="selectedCellNumber"
     :max-cell-number="maxCellNumber"
+    :is-editable="isEditable"
   />
 </template>
 
@@ -56,8 +57,16 @@
       // クリックされたセルの座標を代入
       [selectedCell.value[0], selectedCell.value[1]] = clickTileData;
     }
+    console.debug(selectedCell.value[0], selectedCell.value[1]);
+    console.debug(selectedCell.value[0] !== -1 && selectedCell.value[1] !== -1);
+    console.debug(isEditable.value);
   };
 
+  const isEditable = ref<boolean>(false);
+  watchEffect(() => {
+    isEditable.value =
+      selectedCell.value[0] !== -1 && selectedCell.value[1] !== -1;
+  });
   const maxCellNumber = ref(1);
 </script>
 

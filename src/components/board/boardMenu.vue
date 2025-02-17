@@ -106,7 +106,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup lang="ts" scoped>
   interface Props {
     /**
      *  選択されているセルの座標
@@ -122,6 +122,11 @@
      * 周囲8マスのうち，最大の数値
      */
     maxCellNumber: number;
+
+    /**
+     * スライダーを用いて入力できるかどうか(セルが選択されているかどうか)
+     */
+    isEditable: boolean;
   }
 
   const menuPorps = defineProps<Props>();
@@ -130,11 +135,6 @@
    * スライダーでユーザーが選んだ数値
    */
   const selectedNumber = ref(1);
-
-  /**
-   * スライダーを用いて入力できるかどうか(セルが選択されているかどうか)
-   */
-  const isEditable = ref(true);
 </script>
 
 <style lang="scss" scoped>
