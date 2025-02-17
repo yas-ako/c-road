@@ -19,10 +19,14 @@
       />
     </div>
   </main>
-  <boardMenu />
+  <boardMenu
+    :selected-cell="selectedCell"
+    :selected-cell-number="selectedCellNumber"
+    :max-next-cell-number="11"
+  />
 </template>
 
-<script setup lang="ts">
+<script setup lang="ts" scoped>
   const cellData = ref<number[][]>(
     [...Array(13)].map((_) => Array(13).fill(0)),
   );
@@ -37,6 +41,11 @@
     const [x, y, newCellNumber] = newcellData;
     cellData.value[x][y] = newCellNumber;
   };
+
+  const selectedCell = ref([3, 5]);
+  const selectedCellNumber = ref(
+    cellData.value[selectedCell.value[0]][selectedCell.value[1]],
+  );
 </script>
 
 <style scoped>
