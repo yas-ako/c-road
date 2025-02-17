@@ -6,10 +6,14 @@
         <button
           class="my-auto rounded-md bg-slate-100 fill-current"
           :class="{
-            'hover:bg-gray-300': isEditable,
-            'cursor-default text-slate-300': !isEditable,
+            'hover:bg-gray-300': isEditable && selectedNumber > 1,
+            'cursor-default text-slate-300': !isEditable || selectedNumber == 1,
           }"
-          @click="selectedNumber--"
+          @click="
+            if (isEditable && selectedNumber > 1) {
+              selectedNumber--;
+            }
+          "
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -29,22 +33,24 @@
         >
           {{ selectedNumber }}
         </div>
-        <div class="relative">
+        <div class="mb-[max(5dvh,2.5rem)] flex flex-col">
+          <!-- スライダー -->
           <input
             v-model="selectedNumber"
             type="range"
-            class="input-range relative mb-[max(5dvh,2.5rem)]"
-            :class="{ 'input-range_gray': !isEditable }"
+            class="input-range relative mb-4"
+            :class="{ 'input-range_gray': !isEditable || maxCellNumber == 1 }"
             name="number_input"
             min="1"
-            max="10"
+            :max="maxCellNumber"
             step="1"
             :value="selectedNumber"
             :disabled="!isEditable"
           />
-          <div class="absolute flex w-full justify-between text-xl">
+          <!-- 目盛り -->
+          <div class="flex w-full justify-between text-xl">
             <div>1</div>
-            <div>13</div>
+            <div>{{ maxCellNumber }}</div>
           </div>
         </div>
       </div>
@@ -53,10 +59,17 @@
         <button
           class="my-auto rounded-md bg-slate-100 fill-current"
           :class="{
-            'hover:bg-gray-300': isEditable,
-            'cursor-default text-slate-300': !isEditable,
+            'hover:bg-gray-300':
+              // 入力可能 かつ 数字が最大値より小さい
+              isEditable && selectedNumber < maxCellNumber,
+            'cursor-default text-slate-300':
+              !isEditable || selectedNumber == maxCellNumber,
           }"
-          @click="selectedNumber++"
+          @click="
+            if (isEditable && selectedNumber < maxCellNumber) {
+              selectedNumber++;
+            }
+          "
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -108,7 +121,7 @@
     /**
      * 周囲8マスのうち，最大の数値
      */
-    maxNextCellNumber: number;
+    maxCellNumber: number;
   }
 
   const menuPorps = defineProps<Props>();
@@ -130,7 +143,7 @@
     appearance: none;
     cursor: pointer;
     background: rgb(163 230 53); // 背景
-    height: 5px; // バーの高さ
+    height: 20px; // バーの高さ
     width: 100%; // スライダーの幅
     border: solid 3px rgb(163 230 53); // バーまわりの線
     outline: 0; // アウトラインを消して代わりにfocusのスタイルをあてる

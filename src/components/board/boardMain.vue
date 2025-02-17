@@ -22,7 +22,7 @@
   <boardMenu
     :selected-cell="selectedCell"
     :selected-cell-number="selectedCellNumber"
-    :max-next-cell-number="11"
+    :max-cell-number="maxCellNumber"
   />
 </template>
 
@@ -31,11 +31,11 @@
     [...Array(13)].map((_) => Array(13).fill(0)),
   );
 
-  for (let i = 0; i < cellData.value.length; i++) {
-    for (let j = 0; j < cellData.value.length; j++) {
-      cellData.value[i][j] = 13 * j + i;
-    }
-  }
+  // for (let i = 0; i < cellData.value.length; i++) {
+  //   for (let j = 0; j < cellData.value.length; j++) {
+  //     cellData.value[i][j] = 13 * j + i;
+  //   }
+  // }
 
   const updateCellData = (newcellData: [number, number, number]): void => {
     const [x, y, newCellNumber] = newcellData;
@@ -46,6 +46,8 @@
   const selectedCellNumber = ref(
     cellData.value[selectedCell.value[0]][selectedCell.value[1]],
   );
+
+  const maxCellNumber = ref(1);
 </script>
 
 <style scoped>
