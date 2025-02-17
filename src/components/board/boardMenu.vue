@@ -59,7 +59,30 @@
   </div>
 </template>
 
-<style lang="scss">
+<script lang="ts">
+  interface Props {
+    selectedCell: number[];
+    selectedCellNumber: number;
+  }
+
+  const menuPorps = withDefaults(defineProps<Props>(), {
+    /**
+     * 選択されているセルの座標
+     */
+    selectedCell: () => [3, 5],
+    /**
+     * 選択されているセルに保存されている数値
+     */
+    selectedCellNumber: 5,
+  });
+
+  /**
+   * スライダーでユーザーが選んだ数値
+   */
+  const selectedNumber = ref(1);
+</script>
+
+<style lang="scss" scoped>
   .input-range {
     -webkit-appearance: none; // スタイルリセット
     appearance: none;

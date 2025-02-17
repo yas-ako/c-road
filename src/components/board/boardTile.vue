@@ -37,7 +37,7 @@
   </div>
 </template>
 
-<script lang="ts" setup>
+<script lang="ts" setup scoped>
   interface Props {
     // 1~225の数字の番号
     number: number;
