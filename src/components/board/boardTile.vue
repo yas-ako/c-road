@@ -61,10 +61,18 @@
   };
 
   interface Props {
-    // 1~225の数字の番号
+    /**
+     *  1~225の数字の番号
+     */
     number: number;
-    // 13*13の二次元配列
+
+    /**
+     * 13*13の二次元配列
+     */
     cellData: number[][];
+
+    /** */
+    selectedCell: number[];
   }
   const tileProps = defineProps<Props>();
 
@@ -82,20 +90,27 @@
     // if (cellColor.value === "cell_none") {
     //   cellColor.value = "cell_blue";
     // } else {
+
     tileEmits("clickTileEmits", [
       // x座標
       cellX(tileProps.number),
       // y座標
       cellY(tileProps.number),
-      // 現時点で保存されている数値
-      // tileProps.cellData[cellX(tileProps.number)][cellY(tileProps.number)],
     ]);
-    //   if (cellColor.value === "cell_blue") {
-    //     cellColor.value = "cell_red";
-    //   } else {
-    //     cellColor.value = "cell_blue";
-    //   }
-    // }
+
+    // すでに値が入っているセルは選択できない
+    if (
+      tileProps.cellData[tileProps.selectedCell[0]][
+        tileProps.selectedCell[1]
+      ] === 0
+    ) {
+      if (
+        tileProps.selectedCell[0] === cellX(tileProps.number) &&
+        tileProps.selectedCell[1] === cellY(tileProps.number)
+      ) {
+        cellColor.value = "cell_red_selected";
+      }
+    }
   }
 
   /**
@@ -217,8 +232,10 @@
 
   .cell {
     &_none {
-      border-color: var(--gray-color);
-      color: var(--gray-color);
+      border-color: rgba(0, 0, 0, 0);
+      // color: var(--gray-color);
+      // border: none;
+      color: rgba(0, 0, 0, 0);
     }
 
     &_blue {
@@ -227,10 +244,21 @@
       background-color: var(--blue-color-light);
     }
 
+    &_blue_selected {
+      border-color: var(--blue-color-light);
+      color: rgba(0, 0, 0, 0);
+    }
+
     &_red {
       border-color: var(--red-color-dark);
       color: var(--red-color-dark);
       background-color: var(--red-color-light);
+    }
+
+    &_red_selected {
+      border-color: var(--red-color-light);
+      // outline: var(--red-color-light);
+      color: rgba(0, 0, 0, 0);
     }
   }
 

@@ -15,6 +15,7 @@
         class="grid-item border-gray-240 border-[min(0.2vmin,2.048px)]"
         :number="index"
         :cell-data="cellData"
+        :selected-cell="selectedCell"
         @click-tile-emits="clickTile"
       />
     </div>
@@ -53,11 +54,14 @@
    * `[-1, -1]` の時は選択されていないとき
    */
   const selectedCell = ref([-1, -1]);
-  const selectedCellNumber = ref(
-    selectedCell.value[0] >= 0
-      ? cellData.value[selectedCell.value[0]][selectedCell.value[1]]
-      : 1000,
-  );
+  const selectedCellNumber = ref<number>(0);
+  watchEffect(() => {
+    selectedCellNumber.value =
+      selectedCell.value[0] >= 0
+        ? cellData.value[selectedCell.value[0]][selectedCell.value[1]]
+        : 1000;
+    console.debug("selectedCellNumber.value", selectedCellNumber.value);
+  });
 
   /**
    * boradTile から呼び出されるEmmits
@@ -83,8 +87,15 @@
 
   // 選択されているセルが変わるごとに isEditable に値を代入する
   watchEffect(() => {
+    console.debug("isEditableのためのwatchEffect");
+    console.debug("selectedCellNumber.value", selectedCellNumber.value);
+    // 選択されたセルに入っている値が0であるときのみ
+    // if (selectedCellNumber.value === 0) {
+    //   }
     isEditable.value =
-      selectedCell.value[0] !== -1 && selectedCell.value[1] !== -1;
+      selectedCell.value[0] !== -1 &&
+      selectedCell.value[1] !== -1 &&
+      selectedCellNumber.value === 0;
   });
 
   /**
