@@ -78,7 +78,7 @@
    */
   const clickTile = (clickTileData: [number, number, number]): void => {
     maxCellNumber.value = clickTileData[2];
-    console.debug("maxCellNumber.value", maxCellNumber.value);
+    // console.debug("maxCellNumber.value", maxCellNumber.value);
     if (
       // 同じマスが二度クリックされたとき
       selectedCell.value[0] === clickTileData[0] &&

@@ -121,13 +121,13 @@
 
     // 周囲8マスの値を取得
     for (let i = 0; i < 9; i++) {
-      console.debug("ifの前", i, maxNumber);
+      // console.debug("ifの前", i, maxNumber);
       if (maxNumber < Math.abs(nextCellList.value[i])) {
         maxNumber = Math.abs(nextCellList.value[i]);
       }
     }
     maxNumber++; // 隣り合ったセルの最大値より1だけ大きい値まで入力できる
-    console.debug("ーーifの後", maxNumber);
+    // console.debug("ーーifの後", maxNumber);
 
     /**
      * 向かい合わせのセルの値が同じ組のうち，最小の値
