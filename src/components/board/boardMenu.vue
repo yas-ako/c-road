@@ -154,11 +154,12 @@
     submitButtonOnClickEmits("submitButtonOnClickEmits", selectedNumber.value);
   }
 
-  watchEffect(() => {
-    console.debug(menuPorps.maxCellNumber);
-    // 別のセルを選択するたびに，スライダーの値を1に戻す
-    selectedNumber.value = 1;
-  });
+  watch(
+    () => menuPorps.maxCellNumber,
+    () => {
+      selectedNumber.value = 1;
+    },
+  );
 </script>
 
 <style lang="scss" scoped>
