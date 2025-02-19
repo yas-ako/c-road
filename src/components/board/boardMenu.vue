@@ -39,18 +39,20 @@
             v-model="selectedNumber"
             type="range"
             class="input-range relative mb-4"
-            :class="{ 'input-range_gray': !isEditable || maxCellNumber == 1 }"
+            :class="{
+              'input-range_gray': !isEditable || menuPorps.maxCellNumber == 1,
+            }"
             name="number_input"
             min="1"
-            :max="maxCellNumber"
+            :max="menuPorps.maxCellNumber"
             step="1"
-            :value="selectedNumber"
+            :value="1"
             :disabled="!isEditable"
           />
           <!-- 目盛り -->
           <div class="flex w-full justify-between text-xl">
             <div>1</div>
-            <div>{{ maxCellNumber }}</div>
+            <div>{{ menuPorps.maxCellNumber }}</div>
           </div>
         </div>
       </div>
@@ -61,12 +63,12 @@
           :class="{
             'hover:bg-gray-300':
               // 入力可能 かつ 数字が最大値より小さい
-              isEditable && selectedNumber < maxCellNumber,
+              isEditable && selectedNumber < menuPorps.maxCellNumber,
             'cursor-default text-slate-300':
-              !isEditable || selectedNumber == maxCellNumber,
+              !isEditable || selectedNumber == menuPorps.maxCellNumber,
           }"
           @click="
-            if (isEditable && selectedNumber < maxCellNumber) {
+            if (isEditable && selectedNumber < menuPorps.maxCellNumber) {
               selectedNumber++;
             }
           "
@@ -151,6 +153,12 @@
     }
     submitButtonOnClickEmits("submitButtonOnClickEmits", selectedNumber.value);
   }
+
+  watchEffect(() => {
+    console.debug(menuPorps.maxCellNumber);
+    // 別のセルを選択するたびに，スライダーの値を1に戻す
+    selectedNumber.value = 1;
+  });
 </script>
 
 <style lang="scss" scoped>

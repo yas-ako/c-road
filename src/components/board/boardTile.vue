@@ -81,7 +81,7 @@
 
     /**
      * 手番
-     * 1:青　-1:赤
+     * 1:青 -1:赤
      */
     side: number;
   }
@@ -89,39 +89,86 @@
 
   interface Emits {
     // nweCellData [x, y, newNumber]
-    (event: "clickTileEmits", clickTileData: [number, number]): void;
+    (event: "clickTileEmits", clickTileData: [number, number, number]): void;
   }
   const tileEmits = defineEmits<Emits>();
 
-  const cellColor = ref("cell_none");
+  // セルの色を保存する
+  const cellColor = ref<
+    | "cell_none"
+    | "cell_blue"
+    | "cell_red"
+    | "cell_blue_selected"
+    | "cell_red_selected"
+  >("cell_none");
 
+  /**
+   * 選択されたセルに入っている数値
+   */
   const cellNumber = ref<number>();
 
-  function clickTile() {
-    // if (cellColor.value === "cell_none") {
-    //   cellColor.value = "cell_blue";
-    // } else {
+  /**
+   * 周囲八マスの数値が代入される数値が代入される
+   */
+  const nextCellList = ref<number[]>(new Array(9).fill(0));
 
+  /**
+   * セルがクリックされたときに実行する関数
+   */
+  function clickTile() {
+    // セルに入れることができる最大の整数
+    let maxNumber = 0;
+
+    // 周囲8マスの値を取得
+    for (let i = 0; i < 9; i++) {
+      console.debug("ifの前", i, maxNumber);
+      if (maxNumber < Math.abs(nextCellList.value[i])) {
+        maxNumber = Math.abs(nextCellList.value[i]);
+      }
+    }
+    maxNumber++; // 隣り合ったセルの最大値より1だけ大きい値まで入力できる
+    console.debug("ーーifの後", maxNumber);
+
+    /**
+     * 向かい合わせのセルの値が同じ組のうち，最小の値
+     */
+    let minFacingPair = 1000;
+
+    /**
+     * 向かい合わせのセルのリスト
+     */
+    const fecingCellList = [
+      [0, 8],
+      [1, 7],
+      [2, 6],
+      [3, 5],
+    ];
+
+    if (false) {
+      // 向かい合わせのセルの数値が同じかどうか
+      for (const [j, k] of fecingCellList) {
+        if (
+          Math.abs(nextCellList.value[j]) === Math.abs(nextCellList.value[k]) &&
+          Math.abs(nextCellList.value[j]) < minFacingPair
+        ) {
+          minFacingPair = nextCellList.value[j];
+        }
+      }
+
+      if (minFacingPair !== 1000) {
+        maxNumber = minFacingPair;
+      }
+    }
+
+    // emitsの呼び出し
     tileEmits("clickTileEmits", [
       // x座標
       cellX(tileProps.number),
       // y座標
       cellY(tileProps.number),
+      // セルにおける数値の最大値
+      maxNumber,
     ]);
-
-    // // すでに値が入っているセルは選択できない
-    // if (
-    //   tileProps.cellData[tileProps.selectedCell[0]][
-    //     tileProps.selectedCell[1]
-    //   ] === 0
-    // ) {
-    //   if (
-    //     tileProps.selectedCell[0] === cellX(tileProps.number) &&
-    //     tileProps.selectedCell[1] === cellY(tileProps.number)
-    //   ) {
-    //     cellColor.value = "cell_red_selected";
-    // }
-    // }
   }
 
   /**
@@ -181,7 +228,7 @@
   // });
 
   /**
-   * 周囲の8マスのうち，つながっているマスの番号が代入されている配列
+   * 周囲の8マスのうち，つながっているマスの番号にtrueが代入される
    *
    * ```
    * 0  1  2
@@ -191,6 +238,9 @@
    */
   const nextCells = ref<boolean[]>(new Array(8).fill(false));
 
+  // 選択されたセルの座標が変化したとき
+  // 選択されたセルの見た目を変える
+  // 選択されていないセルは，青・赤・0・のいずれかに分類
   watchEffect(() => {
     cellNumber.value =
       tileProps.cellData[cellX(tileProps.number)][cellY(tileProps.number)];
@@ -221,6 +271,8 @@
     }
   });
 
+  // セルに入っている数値が変化したとき
+  // 周囲のセルとつながる道を書き換える
   watchEffect(() => {
     const directions: { [key: number]: [number, number] } = {
       0: [-1, -1], // 左上
@@ -243,6 +295,8 @@
         const nextY = (y + dy + 13) % 13;
 
         const nextCellNumber = tileProps.cellData[nextX][nextY];
+        nextCellList.value[key] = nextCellNumber;
+        // console.debug(nextCellList.value.toString());
         if (
           Math.abs(tileProps.cellData[x][y] - nextCellNumber) <= 1 &&
           nextCellNumber !== 0

@@ -44,6 +44,11 @@
     [...Array(13)].map((_) => Array(13).fill(0)),
   );
 
+  /**
+   * 選択されているセルに入力できる値の最大値
+   */
+  const maxCellNumber = ref(10);
+
   // for (let i = 0; i < cellData.value.length; i++) {
   //   for (let j = 0; j < cellData.value.length; j++) {
   //     cellData.value[i][j] = 13 * j + i;
@@ -56,19 +61,24 @@
    */
   const selectedCell = ref([-1, -1]);
   const selectedCellNumber = ref<number>(0);
+
+  // 選択されたセルの座標が変化したとき
+  // selectedCellNumber (選択されたセルの数値) を更新する
   watchEffect(() => {
     // どのセルも選択されていないとき，セルの値を1000とする
     selectedCellNumber.value =
       selectedCell.value[0] >= 0
         ? cellData.value[selectedCell.value[0]][selectedCell.value[1]]
         : 1000;
-    console.debug("selectedCellNumber.value", selectedCellNumber.value);
+    // console.debug("selectedCellNumber.value", selectedCellNumber.value);
   });
 
   /**
    * boradTile から呼び出されるEmmits
    */
-  const clickTile = (clickTileData: [number, number]): void => {
+  const clickTile = (clickTileData: [number, number, number]): void => {
+    maxCellNumber.value = clickTileData[2];
+    console.debug("maxCellNumber.value", maxCellNumber.value);
     if (
       // 同じマスが二度クリックされたとき
       selectedCell.value[0] === clickTileData[0] &&
@@ -89,20 +99,15 @@
 
   // 選択されているセルが変わるごとに isEditable に値を代入する
   watchEffect(() => {
-    console.debug("isEditableのためのwatchEffect");
-    console.debug("selectedCellNumber.value", selectedCellNumber.value);
+    // console.debug("isEditableのためのwatchEffect");
+    // console.debug("selectedCellNumber.value", selectedCellNumber.value);
 
-    // 選択されたセルが存在する かつ 選択されたセルに入っている値が0である ときのみ true に
+    // 選択されたセルが存在する(座標が[-1, -1]でない) かつ 選択されたセルに入っている値が0である ときのみ true に
     isEditable.value =
       selectedCell.value[0] !== -1 &&
       selectedCell.value[1] !== -1 &&
       selectedCellNumber.value === 0;
   });
-
-  /**
-   * 選択されているセルに入力できる値の最大値
-   */
-  const maxCellNumber = ref(10);
 
   /**
    * boardMenu からのEmitsがここに来る
