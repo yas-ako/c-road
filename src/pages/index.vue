@@ -1,6 +1,10 @@
 <template>
   <transition name="slide-fade">
-    <div v-if="isNotificationVisible" class="notification">
+    <div
+      v-if="isNotificationVisible"
+      class="notification"
+      :key="notificationKey"
+    >
       <p class="heading">見出し</p>
       <p>これは通知です</p>
     </div>
@@ -42,13 +46,52 @@
   const isNotificationVisible = ref(false);
 
   /**
+   * 異なる通知を区別するためのキー
+   */
+  const notificationKey = ref(0);
+
+  /**
+   * setTimeout の戻り値を保管
+   * (タイムアウトをクリアできるようにする)
+   */
+  const timeoutId = ref(null); // setTimeout の ID を保持
+
+  /**
    * 通知を表示
    */
   const showNotification = () => {
-    isNotificationVisible.value = true;
-    // setTimeout(() => {
-    //   isNotificationVisible.value = false;
-    // }, 5000); // 5秒後に消える
+    if (isNotificationVisible.value) {
+      // すでに表示されている場合、一度非表示にする
+      isNotificationVisible.value = false;
+      // 前回の setTimeout をクリア
+      clearTimeout(timeoutId.value);
+
+      // 少し遅らせて再表示（アニメーションが確実に適用されるように）
+      setTimeout(() => {
+        // keyを変更して強制的に再描画
+        notificationKey.value++;
+        isNotificationVisible.value = true;
+        scheduleHideNotification();
+      }, 100); // 100ms の小さな遅延を入れる
+    } else {
+      // 通知を表示
+      isNotificationVisible.value = true;
+      scheduleHideNotification();
+    }
+  };
+
+  /**
+   * 通知を非表示にするタイマーをスケジュールする
+   */
+  const scheduleHideNotification = () => {
+    // 以前のタイムアウトをクリア
+    clearTimeout(timeoutId.value);
+
+    // タイムアウトのIDを記録
+    timeoutId.value = setTimeout(() => {
+      isNotificationVisible.value = false;
+    }, 5000); // 5秒後に消える
+    console.log(timeoutId.value);
   };
 </script>
 
