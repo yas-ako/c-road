@@ -87,13 +87,39 @@
   }
   const tileProps = defineProps<Props>();
 
+  /**
+   * boardMain.vue に，選択されたセルの場所を送るEmitsの型
+   */
   interface Emits {
-    // nweCellData [x, y, newNumber]
-    (event: "clickTileEmits", clickTileData: [number, number, number]): void;
+    (
+      event: "clickTileEmits",
+      /**
+       *  @param clickTileData [x, y, newNumber, notificationType]
+       */
+      clickTileData: [number, number, number, number],
+    ): void;
   }
+
+  /**
+   * boardMain.vue に 選択されたセルの場所を送るEmitsの型
+   */
   const tileEmits = defineEmits<Emits>();
 
-  // セルの色を保存する
+  // /**
+  //  * index.vue に通知を送るEmmitsの型
+  //  */
+  // interface notificationEmits {
+  //   (event: "sendNotification", notificationData: [string, string]): void;
+  // }
+
+  // /**
+  //  * index.vue に通知を送るEmmits
+  //  */
+  // const tileNotificationEmits = defineEmits<notificationEmits>();
+
+  /**
+   * 現在のセルの色
+   */
   const cellColor = ref<
     | "cell_none"
     | "cell_blue"
@@ -144,24 +170,27 @@
       [3, 5],
     ];
 
-    if (true) {
-      // 向かい合わせのセルの数値が同じかどうか
-      for (const [j, k] of fecingCellList) {
-        if (
-          Math.abs(nextCellList.value[j]) === Math.abs(nextCellList.value[k]) &&
-          Math.abs(nextCellList.value[j]) < minFacingPair &&
-          Math.abs(nextCellList.value[j]) !== 0
-        ) {
-          minFacingPair = Math.abs(nextCellList.value[j]);
-        }
-      }
+    // 初期値: -1
+    let notificationType: number = -1;
 
-      if (minFacingPair !== 1000) {
-        maxNumber = minFacingPair;
+    // 向かい合わせのセルの数値が同じかどうか
+    for (const [j, k] of fecingCellList) {
+      if (
+        Math.abs(nextCellList.value[j]) === Math.abs(nextCellList.value[k]) &&
+        Math.abs(nextCellList.value[j]) < minFacingPair &&
+        Math.abs(nextCellList.value[j]) !== 0
+      ) {
+        minFacingPair = Math.abs(nextCellList.value[j]);
       }
     }
 
+    if (minFacingPair !== 1000) {
+      maxNumber = minFacingPair;
+      notificationType = 0;
+    }
+
     // emitsの呼び出し
+    // boardMain.vue へ，選択されたセルの情報を送る
     tileEmits("clickTileEmits", [
       // x座標
       cellX(tileProps.number),
@@ -169,6 +198,7 @@
       cellY(tileProps.number),
       // セルにおける数値の最大値
       maxNumber,
+      notificationType,
     ]);
   }
 
