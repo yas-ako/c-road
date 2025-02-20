@@ -144,14 +144,15 @@
       [3, 5],
     ];
 
-    if (false) {
+    if (true) {
       // 向かい合わせのセルの数値が同じかどうか
       for (const [j, k] of fecingCellList) {
         if (
           Math.abs(nextCellList.value[j]) === Math.abs(nextCellList.value[k]) &&
-          Math.abs(nextCellList.value[j]) < minFacingPair
+          Math.abs(nextCellList.value[j]) < minFacingPair &&
+          Math.abs(nextCellList.value[j]) !== 0
         ) {
-          minFacingPair = nextCellList.value[j];
+          minFacingPair = Math.abs(nextCellList.value[j]);
         }
       }
 

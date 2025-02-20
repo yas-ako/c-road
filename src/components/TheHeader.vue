@@ -4,7 +4,7 @@
       <h1
         class="mx-auto flex-1 text-center text-2xl font-bold tracking-wider text-blue-900"
       >
-        C*-road
+        <NuxtLink href="/">C*-road</NuxtLink>
       </h1>
       <div class="">
         <NuxtLink href="/about">About</NuxtLink>
