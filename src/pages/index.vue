@@ -6,7 +6,7 @@
   const confirmNavigation = () => window.confirm("本当にページを離れますか？");
 
   // 別のページに遷移しようとしたとき
-  onBeforeRouteLeave((to, from, next) => {
+  onBeforeRouteLeave((_to, _from, next) => {
     if (confirmNavigation()) {
       next();
     } else {
