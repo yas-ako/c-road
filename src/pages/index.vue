@@ -10,11 +10,10 @@
 </template>
 
 <script setup>
-  // import { onMounted, onBeforeUnmount } from "vue";
-  // import { onBeforeRouteLeave } from "vue-router";
-
+  // ページ遷移を防ぐ処理
   const confirmNavigation = () => window.confirm("本当にページを離れますか？");
 
+  // 別のページに遷移しようとしたとき
   onBeforeRouteLeave((to, from, next) => {
     if (confirmNavigation()) {
       next();
@@ -23,6 +22,7 @@
     }
   });
 
+  // ページを再読み込みしようとしたとき，ページを閉じようとしたとき
   onMounted(() => {
     const handler = (event) => {
       event.preventDefault();
@@ -35,10 +35,15 @@
     });
   });
 
-  // import { ref } from "vue";
-
+  // 通知の実装
+  /**
+   * 通知が表示されているかどうか
+   */
   const isNotificationVisible = ref(false);
 
+  /**
+   * 通知を表示
+   */
   const showNotification = () => {
     isNotificationVisible.value = true;
     // setTimeout(() => {
