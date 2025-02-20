@@ -1,5 +1,5 @@
 <template>
-  <div class="flex h-[40dvh] min-h-28 items-stretch justify-between">
+  <div class="flex items-stretch justify-between">
     <div class="flex w-full justify-between">
       <!-- 左のボタン -->
       <div class="mx-4 flex justify-center">
@@ -26,35 +26,38 @@
         </button>
       </div>
       <!-- 中央の数字とスライダー -->
-      <div class="grid h-full w-full grid-flow-row gap-7">
+      <div class="grid h-full w-full grid-flow-row gap-3">
         <div
-          class="mt-[max(4dvh,0.75rem)] text-center text-3xl"
+          class="mt-[max(2dvh,0.75rem)] text-center text-3xl"
           :class="{ 'text-slate-300': !isEditable }"
         >
           {{ selectedNumber }}
         </div>
-        <div class="mb-[max(5dvh,2.5rem)] flex flex-col">
-          <!-- スライダー -->
-          <input
-            v-model="selectedNumber"
-            type="range"
-            class="input-range relative mb-4"
-            :class="{
-              'input-range_gray': !isEditable || menuPorps.maxCellNumber == 1,
-            }"
-            name="number_input"
-            min="1"
-            :max="menuPorps.maxCellNumber"
-            step="1"
-            :value="1"
-            :disabled="!isEditable"
-          />
-          <!-- 目盛り -->
-          <div class="flex w-full justify-between text-xl">
-            <div>1</div>
-            <div>{{ menuPorps.maxCellNumber }}</div>
-          </div>
+        <!-- <div class="mb-[max(5dvh,2.5rem)] flex flex-col"> -->
+        <!-- スライダー -->
+        <input
+          v-model="selectedNumber"
+          type="range"
+          class="input-range relative"
+          :class="{
+            'input-range_gray': !isEditable || menuPorps.maxCellNumber == 1,
+          }"
+          name="number_input"
+          min="1"
+          :max="menuPorps.maxCellNumber"
+          step="1"
+          :value="1"
+          :disabled="!isEditable"
+        />
+        <!-- 目盛り -->
+        <div
+          class="mb-[max(2dvh,0.75rem)] flex w-full justify-between text-xl"
+          :class="{ 'text-slate-300': !isEditable }"
+        >
+          <div>1</div>
+          <div>{{ menuPorps.maxCellNumber }}</div>
         </div>
+        <!-- </div> -->
       </div>
       <!-- 右のボタン -->
       <div class="mx-4 flex justify-center">
