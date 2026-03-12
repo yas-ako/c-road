@@ -11,7 +11,7 @@
  * 6  7  8
  * ```
  */
-const DIRECTIONS: { [key: number]: [number, number] } = {
+export const DIRECTIONS: { [key: number]: [number, number] } = {
   0: [-1, -1],
   1: [0, -1],
   2: [1, -1],

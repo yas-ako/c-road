@@ -15,6 +15,7 @@ export const useNotificationStore = defineStore("notification", () => {
   const key = ref(0);
 
   let timeoutId: ReturnType<typeof setTimeout> | undefined;
+  let reshowTimeoutId: ReturnType<typeof setTimeout> | undefined;
 
   function show(id: number): void {
     const entry = notificationData[id];
@@ -24,12 +25,14 @@ export const useNotificationStore = defineStore("notification", () => {
     if (isVisible.value) {
       isVisible.value = false;
       clearTimeout(timeoutId);
-      setTimeout(() => {
+      clearTimeout(reshowTimeoutId);
+      reshowTimeoutId = setTimeout(() => {
         key.value++;
         isVisible.value = true;
         scheduleHide();
       }, 100);
     } else {
+      clearTimeout(reshowTimeoutId);
       isVisible.value = true;
       scheduleHide();
     }

@@ -46,6 +46,7 @@
 
 <script lang="ts" setup scoped>
   import { cellX, cellY, isInEdge } from "~/composables/useCellCoords";
+  import { DIRECTIONS } from "~/composables/useGameLogic";
   import { useGameStore } from "~/stores/game";
 
   const game = useGameStore();
@@ -107,17 +108,6 @@
       cellColor.value = "cell_none";
     }
   });
-
-  const DIRECTIONS: { [key: number]: [number, number] } = {
-    0: [-1, -1],
-    1: [0, -1],
-    2: [1, -1],
-    3: [-1, 0],
-    5: [1, 0],
-    6: [-1, 1],
-    7: [0, 1],
-    8: [1, 1],
-  };
 
   // 周囲のセルとの道を更新する
   watchEffect(() => {
