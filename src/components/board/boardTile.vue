@@ -46,13 +46,14 @@
 
 <script lang="ts" setup scoped>
   import { useCellCoords } from "~/composables/useCellCoords";
+  import { useGameStore } from "~/stores/game";
 
   const { cellX, cellY, isInEdge } = useCellCoords();
   const game = useGameStore();
 
   interface Props {
     /**
-     * 1~225の数字の番号
+     * 0~224のセル番号
      */
     number: number;
   }

@@ -27,6 +27,8 @@
 </template>
 
 <script setup lang="ts" scoped>
+  import { useNotificationStore } from "~/stores/notification";
+
   const notification = useNotificationStore();
 </script>
 

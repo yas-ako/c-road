@@ -45,7 +45,6 @@
           min="1"
           :max="game.maxCellNumber"
           step="1"
-          :value="1"
           :disabled="!game.isEditable"
         />
         <!-- 目盛り -->
@@ -110,6 +109,8 @@
 </template>
 
 <script setup lang="ts" scoped>
+  import { useGameStore } from "~/stores/game";
+
   const game = useGameStore();
 
   /**

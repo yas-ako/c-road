@@ -1,4 +1,5 @@
 import { calcUpperLimit, calcDemolition } from "~/composables/useGameLogic";
+import { useNotificationStore } from "~/stores/notification";
 
 export const useGameStore = defineStore("game", () => {
   // ────────────── State ──────────────
@@ -29,6 +30,11 @@ export const useGameStore = defineStore("game", () => {
    * 取り壊し処理中フラグ（true中はタイル操作不可）
    */
   const isBeingRemoved = ref<boolean>(false);
+
+  /**
+   * 取り壊しタイマーのID（resetGame時にクリアするために保持）
+   */
+  let demolitionTimeoutId: ReturnType<typeof setTimeout> | undefined;
 
   // ────────────── Getters ──────────────
 
@@ -79,6 +85,8 @@ export const useGameStore = defineStore("game", () => {
    * 手番交代・取り壊しルールの計算・実行を行う
    */
   function submitMove(value: number): void {
+    if (!isEditable.value) return;
+
     const [x, y] = selectedCell.value;
     const row = cellData.value[x];
     if (row) row[y] = value * side.value;
@@ -87,11 +95,12 @@ export const useGameStore = defineStore("game", () => {
     selectedCell.value = [-1, -1];
     isBeingRemoved.value = true;
 
+    clearTimeout(demolitionTimeoutId);
     const removedList = calcDemolition(cellData.value);
 
     if (removedList.length > 0) {
       useNotificationStore().show(1);
-      setTimeout(() => {
+      demolitionTimeoutId = setTimeout(() => {
         for (const coord of removedList) {
           const r = cellData.value[coord.x];
           if (r) r[coord.y] = 0;
@@ -107,6 +116,7 @@ export const useGameStore = defineStore("game", () => {
    * ゲームをリセットする
    */
   function resetGame(): void {
+    clearTimeout(demolitionTimeoutId);
     cellData.value = [...Array(13)].map(() => Array(13).fill(0));
     side.value = 1;
     selectedCell.value = [-1, -1];
