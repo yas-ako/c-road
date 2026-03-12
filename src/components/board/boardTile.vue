@@ -14,9 +14,9 @@
       <div v-if="cellData" class="z-5 mx-auto my-auto text-[min(4.2vmin,27px)]">
         {{
           Math.abs(
-            tileProps.cellData[cellX(tileProps.number)][
+            tileProps.cellData[cellX(tileProps.number)]?.[
               cellY(tileProps.number)
-            ],
+            ] ?? 0,
           )
         }}
         <!-- {{ tileProps.number }} -->
@@ -77,7 +77,7 @@
     /**
      * 選択されたセルの座標 [x, y]
      */
-    selectedCell: number[];
+    selectedCell: [number, number];
 
     /**
      * 手番
@@ -131,7 +131,7 @@
   /**
    * 選択されたセルに入っている数値
    */
-  const cellNumber = ref<number>();
+  const cellNumber = ref<number>(0);
 
   /**
    * 周囲八マスの数値が代入される数値が代入される
@@ -148,8 +148,8 @@
     // 周囲8マスの値を取得
     for (let i = 0; i < 9; i++) {
       // console.debug("ifの前", i, maxNumber);
-      if (maxNumber < Math.abs(nextCellList.value[i])) {
-        maxNumber = Math.abs(nextCellList.value[i]);
+      if (maxNumber < Math.abs(nextCellList.value[i] ?? 0)) {
+        maxNumber = Math.abs(nextCellList.value[i] ?? 0);
       }
     }
     maxNumber++; // 隣り合ったセルの最大値より1だけ大きい値まで入力できる
@@ -163,7 +163,7 @@
     /**
      * 向かい合わせのセルのリスト
      */
-    const fecingCellList = [
+    const fecingCellList: [number, number][] = [
       [0, 8],
       [1, 7],
       [2, 6],
@@ -176,11 +176,11 @@
     // 向かい合わせのセルの数値が同じかどうか
     for (const [j, k] of fecingCellList) {
       if (
-        Math.abs(nextCellList.value[j]) === Math.abs(nextCellList.value[k]) &&
-        Math.abs(nextCellList.value[j]) < minFacingPair &&
-        Math.abs(nextCellList.value[j]) !== 0
+        Math.abs(nextCellList.value[j] ?? 0) === Math.abs(nextCellList.value[k] ?? 0) &&
+        Math.abs(nextCellList.value[j] ?? 0) < minFacingPair &&
+        Math.abs(nextCellList.value[j] ?? 0) !== 0
       ) {
-        minFacingPair = Math.abs(nextCellList.value[j]);
+        minFacingPair = Math.abs(nextCellList.value[j] ?? 0);
       }
     }
 
@@ -274,13 +274,13 @@
   // 選択されていないセルは，青・赤・0・のいずれかに分類
   watchEffect(() => {
     cellNumber.value =
-      tileProps.cellData[cellX(tileProps.number)][cellY(tileProps.number)];
+      tileProps.cellData[cellX(tileProps.number)]?.[cellY(tileProps.number)] ?? 0;
     if (
       tileProps.selectedCell[0] === cellX(tileProps.number) &&
       tileProps.selectedCell[1] === cellY(tileProps.number) &&
-      tileProps.cellData[tileProps.selectedCell[0]][
+      (tileProps.cellData[tileProps.selectedCell[0]]?.[
         tileProps.selectedCell[1]
-      ] === 0
+      ] ?? -1) === 0
     ) {
       // セルが選択されている場合
       if (tileProps.side === 1) {
@@ -319,17 +319,19 @@
     for (const key in directions) {
       if (Object.prototype.hasOwnProperty.call(directions, key)) {
         const [x, y] = [cellX(tileProps.number), cellY(tileProps.number)];
-        const [dx, dy] = directions[key];
+        const dir = directions[key];
+        if (dir === undefined) continue;
+        const [dx, dy] = dir;
 
         // 13を足してから13で割ったあまりをとることで，隣のマスが盤面をはみ出した時，反対側のマス目を参照参照するようにした
         const nextX = (x + dx + 13) % 13;
         const nextY = (y + dy + 13) % 13;
 
-        const nextCellNumber = tileProps.cellData[nextX][nextY];
+        const nextCellNumber = tileProps.cellData[nextX]?.[nextY] ?? 0;
         nextCellList.value[key] = nextCellNumber;
         // console.debug(nextCellList.value.toString());
         if (
-          Math.abs(tileProps.cellData[x][y] - nextCellNumber) <= 1 &&
+          Math.abs((tileProps.cellData[x]?.[y] ?? 0) - nextCellNumber) <= 1 &&
           nextCellNumber !== 0
         ) {
           nextCells.value[key] = true;

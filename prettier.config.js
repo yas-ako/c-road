@@ -1,7 +1,5 @@
-// 参考
-// https://www.npmjs.com/package/prettier-plugin-tailwindcss
-
-// prettier.config.js
-module.exports = {
+// https://github.com/tailwindlabs/prettier-plugin-tailwindcss
+export default {
   plugins: ["prettier-plugin-tailwindcss"],
+  tailwindStylesheet: "./src/assets/css/tailwind.css",
 };
