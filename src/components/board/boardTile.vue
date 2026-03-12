@@ -45,10 +45,9 @@
 </template>
 
 <script lang="ts" setup scoped>
-  import { useCellCoords } from "~/composables/useCellCoords";
+  import { cellX, cellY, isInEdge } from "~/composables/useCellCoords";
   import { useGameStore } from "~/stores/game";
 
-  const { cellX, cellY, isInEdge } = useCellCoords();
   const game = useGameStore();
 
   interface Props {
@@ -109,23 +108,23 @@
     }
   });
 
+  const DIRECTIONS: { [key: number]: [number, number] } = {
+    0: [-1, -1],
+    1: [0, -1],
+    2: [1, -1],
+    3: [-1, 0],
+    5: [1, 0],
+    6: [-1, 1],
+    7: [0, 1],
+    8: [1, 1],
+  };
+
   // 周囲のセルとの道を更新する
   watchEffect(() => {
-    const directions: { [key: number]: [number, number] } = {
-      0: [-1, -1],
-      1: [0, -1],
-      2: [1, -1],
-      3: [-1, 0],
-      5: [1, 0],
-      6: [-1, 1],
-      7: [0, 1],
-      8: [1, 1],
-    };
-
     const x = cellX(tileProps.number);
     const y = cellY(tileProps.number);
 
-    for (const [keyStr, [dx, dy]] of Object.entries(directions)) {
+    for (const [keyStr, [dx, dy]] of Object.entries(DIRECTIONS)) {
       const key = Number(keyStr);
       const nextX = (x + dx + 13) % 13;
       const nextY = (y + dy + 13) % 13;

@@ -7,7 +7,7 @@
           class="my-auto rounded-md bg-slate-100 fill-current"
           :class="{
             'hover:bg-gray-300': game.isEditable && selectedNumber > 1,
-            'cursor-default text-slate-300': !game.isEditable || selectedNumber == 1,
+            'cursor-default text-slate-300': !game.isEditable || selectedNumber === 1,
           }"
           @click="
             if (game.isEditable && selectedNumber > 1) {
@@ -39,7 +39,7 @@
           type="range"
           class="input-range relative"
           :class="{
-            'input-range_gray': !game.isEditable || game.maxCellNumber == 1,
+            'input-range_gray': !game.isEditable || game.maxCellNumber === 1,
           }"
           name="number_input"
           min="1"
@@ -64,7 +64,7 @@
             'hover:bg-gray-300':
               game.isEditable && selectedNumber < game.maxCellNumber,
             'cursor-default text-slate-300':
-              !game.isEditable || selectedNumber == game.maxCellNumber,
+              !game.isEditable || selectedNumber === game.maxCellNumber,
           }"
           @click="
             if (game.isEditable && selectedNumber < game.maxCellNumber) {
