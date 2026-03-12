@@ -163,7 +163,7 @@
     /**
      * 向かい合わせのセルのリスト
      */
-    const fecingCellList: [number, number][] = [
+    const facingCellList: [number, number][] = [
       [0, 8],
       [1, 7],
       [2, 6],
@@ -174,7 +174,7 @@
     let notificationType: number = -1;
 
     // 向かい合わせのセルの数値が同じかどうか
-    for (const [j, k] of fecingCellList) {
+    for (const [j, k] of facingCellList) {
       if (
         Math.abs(nextCellList.value[j] ?? 0) === Math.abs(nextCellList.value[k] ?? 0) &&
         Math.abs(nextCellList.value[j] ?? 0) < minFacingPair &&
@@ -316,28 +316,24 @@
       8: [1, 1], // 右下
     };
 
-    for (const key in directions) {
-      if (Object.prototype.hasOwnProperty.call(directions, key)) {
-        const [x, y] = [cellX(tileProps.number), cellY(tileProps.number)];
-        const dir = directions[key];
-        if (dir === undefined) continue;
-        const [dx, dy] = dir;
+    for (const [keyStr, [dx, dy]] of Object.entries(directions)) {
+      const key = Number(keyStr);
+      const [x, y] = [cellX(tileProps.number), cellY(tileProps.number)];
 
-        // 13を足してから13で割ったあまりをとることで，隣のマスが盤面をはみ出した時，反対側のマス目を参照参照するようにした
-        const nextX = (x + dx + 13) % 13;
-        const nextY = (y + dy + 13) % 13;
+      // 13を足してから13で割ったあまりをとることで，隣のマスが盤面をはみ出した時，反対側のマス目を参照参照するようにした
+      const nextX = (x + dx + 13) % 13;
+      const nextY = (y + dy + 13) % 13;
 
-        const nextCellNumber = tileProps.cellData[nextX]?.[nextY] ?? 0;
-        nextCellList.value[key] = nextCellNumber;
-        // console.debug(nextCellList.value.toString());
-        if (
-          Math.abs((tileProps.cellData[x]?.[y] ?? 0) - nextCellNumber) <= 1 &&
-          nextCellNumber !== 0
-        ) {
-          nextCells.value[key] = true;
-        } else {
-          nextCells.value[key] = false;
-        }
+      const nextCellNumber = tileProps.cellData[nextX]?.[nextY] ?? 0;
+      nextCellList.value[key] = nextCellNumber;
+      // console.debug(nextCellList.value.toString());
+      if (
+        Math.abs((tileProps.cellData[x]?.[y] ?? 0) - nextCellNumber) <= 1 &&
+        nextCellNumber !== 0
+      ) {
+        nextCells.value[key] = true;
+      } else {
+        nextCells.value[key] = false;
       }
     }
   });
