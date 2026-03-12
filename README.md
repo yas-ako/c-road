@@ -5,4 +5,4 @@
 
 ## C*-road とは
 
-高校の友人が高校1年生の時に考案したボードゲームです．
+[@cyclemath](https://github.com/cyclemath) が高校1年生の時に考案したボードゲームです
