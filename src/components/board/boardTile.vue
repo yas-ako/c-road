@@ -11,15 +11,14 @@
       :class="cellColor"
     >
       <!-- 数字 -->
-      <div v-if="cellData" class="z-5 mx-auto my-auto text-[min(4.2vmin,27px)]">
+      <div class="z-5 mx-auto my-auto text-[min(4.2vmin,27px)]">
         {{
           Math.abs(
-            tileProps.cellData[cellX(tileProps.number)]?.[
+            game.cellData[cellX(tileProps.number)]?.[
               cellY(tileProps.number)
             ] ?? 0,
           )
         }}
-        <!-- {{ tileProps.number }} -->
       </div>
     </div>
     <!-- まわりに伸びる道(8本用意する, 4は無し) -->
@@ -46,76 +45,19 @@
 </template>
 
 <script lang="ts" setup scoped>
-  const isInEdge = (n: number) => {
-    // 0~14の範囲にあるか
-    if (n >= 0 && n <= 14) return true;
+  import { cellX, cellY, isInEdge } from "~/composables/useCellCoords";
+  import { DIRECTIONS } from "~/composables/useGameLogic";
+  import { useGameStore } from "~/stores/game";
 
-    // 15で割って14余る数か
-    if (n % 15 === 14) return true;
-
-    // 15の倍数か
-    if (n % 15 === 0) return true;
-
-    // 211~225の範囲にあるか
-    if (n >= 210 && n <= 224) return true;
-
-    // いずれの条件にも当てはまらない場合
-    return false;
-  };
+  const game = useGameStore();
 
   interface Props {
     /**
-     *  1~225の数字の番号
+     * 0~224のセル番号
      */
     number: number;
-
-    /**
-     * 13*13の二次元配列
-     */
-    cellData: number[][];
-
-    /**
-     * 選択されたセルの座標 [x, y]
-     */
-    selectedCell: [number, number];
-
-    /**
-     * 手番
-     * 1:青 -1:赤
-     */
-    side: number;
   }
   const tileProps = defineProps<Props>();
-
-  /**
-   * boardMain.vue に，選択されたセルの場所を送るEmitsの型
-   */
-  interface Emits {
-    (
-      event: "clickTileEmits",
-      /**
-       *  @param clickTileData [x, y, newNumber, notificationType]
-       */
-      clickTileData: [number, number, number, number],
-    ): void;
-  }
-
-  /**
-   * boardMain.vue に 選択されたセルの場所を送るEmitsの型
-   */
-  const tileEmits = defineEmits<Emits>();
-
-  // /**
-  //  * index.vue に通知を送るEmmitsの型
-  //  */
-  // interface notificationEmits {
-  //   (event: "sendNotification", notificationData: [string, string]): void;
-  // }
-
-  // /**
-  //  * index.vue に通知を送るEmmits
-  //  */
-  // const tileNotificationEmits = defineEmits<notificationEmits>();
 
   /**
    * 現在のセルの色
@@ -129,136 +71,6 @@
   >("cell_none");
 
   /**
-   * 選択されたセルに入っている数値
-   */
-  const cellNumber = ref<number>(0);
-
-  /**
-   * 周囲八マスの数値が代入される数値が代入される
-   */
-  const nextCellList = ref<number[]>(new Array(9).fill(0));
-
-  /**
-   * セルがクリックされたときに実行する関数
-   */
-  function clickTile() {
-    // セルに入れることができる最大の整数
-    let maxNumber = 0;
-
-    // 周囲8マスの値を取得
-    for (let i = 0; i < 9; i++) {
-      // console.debug("ifの前", i, maxNumber);
-      if (maxNumber < Math.abs(nextCellList.value[i] ?? 0)) {
-        maxNumber = Math.abs(nextCellList.value[i] ?? 0);
-      }
-    }
-    maxNumber++; // 隣り合ったセルの最大値より1だけ大きい値まで入力できる
-    // console.debug("ーーifの後", maxNumber);
-
-    /**
-     * 向かい合わせのセルの値が同じ組のうち，最小の値
-     */
-    let minFacingPair = 1000;
-
-    /**
-     * 向かい合わせのセルのリスト
-     */
-    const facingCellList: [number, number][] = [
-      [0, 8],
-      [1, 7],
-      [2, 6],
-      [3, 5],
-    ];
-
-    // 初期値: -1
-    let notificationType: number = -1;
-
-    // 向かい合わせのセルの数値が同じかどうか
-    for (const [j, k] of facingCellList) {
-      if (
-        Math.abs(nextCellList.value[j] ?? 0) === Math.abs(nextCellList.value[k] ?? 0) &&
-        Math.abs(nextCellList.value[j] ?? 0) < minFacingPair &&
-        Math.abs(nextCellList.value[j] ?? 0) !== 0
-      ) {
-        minFacingPair = Math.abs(nextCellList.value[j] ?? 0);
-      }
-    }
-
-    if (minFacingPair !== 1000) {
-      maxNumber = minFacingPair;
-      notificationType = 0;
-    }
-
-    // emitsの呼び出し
-    // boardMain.vue へ，選択されたセルの情報を送る
-    tileEmits("clickTileEmits", [
-      // x座標
-      cellX(tileProps.number),
-      // y座標
-      cellY(tileProps.number),
-      // セルにおける数値の最大値
-      maxNumber,
-      notificationType,
-    ]);
-  }
-
-  /**
-   * セルの番号(0~255)をもとに，どのマス目を指すか求める．x座標
-   * @param no セルの番号(0~255)
-   */
-  function cellX(no: number): number {
-    const result = remainder(no, 15);
-    let index: number;
-    if (result === 0) {
-      index = 13;
-    } else if (result === 14) {
-      index = 1;
-    } else {
-      index = result;
-    }
-    return index - 1; // 0～12 に調整
-  }
-
-  /**
-   * セルの番号(0~255)をもとに，どのマス目を指すか求める．x座標
-   * @param no セルの番号(0~255)
-   */
-  function cellY(no: number): number {
-    const result = quotient(no, 15);
-    let index: number;
-    if (result === 0) {
-      index = 13;
-    } else if (result === 14) {
-      index = 1;
-    } else {
-      index = result;
-    }
-    return index - 1; // 0～12 に調整
-  }
-
-  /**
-   * 商を求める関数
-   * @param dividend 割られる数
-   * @param divisor 割る数
-   */
-  function quotient(dividend: number, divisor: number): number {
-    return Math.floor(dividend / divisor);
-  }
-
-  /**
-   * 余りを求める関数
-   * @param dividend 割られる数
-   * @param divisor 割る数
-   */
-  function remainder(dividend: number, divisor: number): number {
-    return dividend % divisor;
-  }
-
-  //   watch(() => props.value, (newValue, oldValue) => {
-  //   console.log(`値が変わりました: ${oldValue} → ${newValue}`);
-  // });
-
-  /**
    * 周囲の8マスのうち，つながっているマスの番号にtrueが代入される
    *
    * ```
@@ -267,74 +79,51 @@
    * 6  7  8
    * ```
    */
-  const nextCells = ref<boolean[]>(new Array(8).fill(false));
+  const nextCells = ref<boolean[]>(new Array(9).fill(false));
 
-  // 選択されたセルの座標が変化したとき
-  // 選択されたセルの見た目を変える
-  // 選択されていないセルは，青・赤・0・のいずれかに分類
+  /**
+   * タイルがクリックされたときの処理
+   */
+  function clickTile() {
+    game.selectCell(cellX(tileProps.number), cellY(tileProps.number));
+  }
+
+  // セルの色を更新する
   watchEffect(() => {
-    cellNumber.value =
-      tileProps.cellData[cellX(tileProps.number)]?.[cellY(tileProps.number)] ?? 0;
+    const x = cellX(tileProps.number);
+    const y = cellY(tileProps.number);
+    const cellNumber = game.cellData[x]?.[y] ?? 0;
+
     if (
-      tileProps.selectedCell[0] === cellX(tileProps.number) &&
-      tileProps.selectedCell[1] === cellY(tileProps.number) &&
-      (tileProps.cellData[tileProps.selectedCell[0]]?.[
-        tileProps.selectedCell[1]
-      ] ?? -1) === 0
+      game.selectedCell[0] === x &&
+      game.selectedCell[1] === y &&
+      (game.cellData[game.selectedCell[0]]?.[game.selectedCell[1]] ?? -1) === 0
     ) {
-      // セルが選択されている場合
-      if (tileProps.side === 1) {
-        // 青の時
-        cellColor.value = "cell_blue_selected";
-      } else {
-        // 赤の時
-        cellColor.value = "cell_red_selected";
-      }
-    } else if (cellNumber.value > 0) {
-      // セルが選択されておらず，青の時
+      cellColor.value = game.side === 1 ? "cell_blue_selected" : "cell_red_selected";
+    } else if (cellNumber > 0) {
       cellColor.value = "cell_blue";
-    } else if (cellNumber.value < 0) {
-      // セルが選択されておらず，赤の時
+    } else if (cellNumber < 0) {
       cellColor.value = "cell_red";
     } else {
-      // セルが選択されておらず，ゼロの時
       cellColor.value = "cell_none";
     }
   });
 
-  // セルに入っている数値が変化したとき
-  // 周囲のセルとつながる道を書き換える
+  // 周囲のセルとの道を更新する
   watchEffect(() => {
-    const directions: { [key: number]: [number, number] } = {
-      0: [-1, -1], // 左上
-      1: [0, -1], // 上
-      2: [1, -1], // 右上
-      3: [-1, 0], // 左
-      5: [1, 0], // 右
-      6: [-1, 1], // 左下
-      7: [0, 1], // 下
-      8: [1, 1], // 右下
-    };
+    const x = cellX(tileProps.number);
+    const y = cellY(tileProps.number);
 
-    for (const [keyStr, [dx, dy]] of Object.entries(directions)) {
+    for (const [keyStr, [dx, dy]] of Object.entries(DIRECTIONS)) {
       const key = Number(keyStr);
-      const [x, y] = [cellX(tileProps.number), cellY(tileProps.number)];
-
-      // 13を足してから13で割ったあまりをとることで，隣のマスが盤面をはみ出した時，反対側のマス目を参照参照するようにした
       const nextX = (x + dx + 13) % 13;
       const nextY = (y + dy + 13) % 13;
 
-      const nextCellNumber = tileProps.cellData[nextX]?.[nextY] ?? 0;
-      nextCellList.value[key] = nextCellNumber;
-      // console.debug(nextCellList.value.toString());
-      if (
-        Math.abs((tileProps.cellData[x]?.[y] ?? 0) - nextCellNumber) <= 1 &&
-        nextCellNumber !== 0
-      ) {
-        nextCells.value[key] = true;
-      } else {
-        nextCells.value[key] = false;
-      }
+      const currentValue = game.cellData[x]?.[y] ?? 0;
+      const nextCellValue = game.cellData[nextX]?.[nextY] ?? 0;
+
+      nextCells.value[key] =
+        Math.abs(currentValue - nextCellValue) <= 1 && nextCellValue !== 0;
     }
   });
 </script>
@@ -352,8 +141,6 @@
   .cell {
     &_none {
       border-color: rgba(0, 0, 0, 0);
-      // color: var(--gray-color);
-      // border: none;
       color: rgba(0, 0, 0, 0);
     }
 
@@ -376,7 +163,6 @@
 
     &_red_selected {
       border-color: var(--red-color-light);
-      // outline: var(--red-color-light);
       color: rgba(0, 0, 0, 0);
     }
   }
