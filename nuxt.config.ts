@@ -3,7 +3,7 @@ export default defineNuxtConfig({
   devtools: { enabled: false },
 
   srcDir: "src",
-  modules: ["@nuxt/eslint"],
+  modules: ["@nuxt/eslint", "@pinia/nuxt"],
   ssr: false,
 
   css: ["~/assets/css/tailwind.css"],
