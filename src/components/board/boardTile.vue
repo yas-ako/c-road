@@ -40,7 +40,7 @@
     <!-- 端のセルの網掛け -->
     <div
       v-if="isInEdge(tileProps.number)"
-      class="absolute z-10 h-full w-full bg-white bg-opacity-60"
+      class="absolute z-10 h-full w-full bg-white/60"
     ></div>
   </div>
 </template>
