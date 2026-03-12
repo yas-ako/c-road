@@ -72,7 +72,7 @@
    *
    * `[-1, -1]` の時は選択されていないとき
    */
-  const selectedCell = ref([-1, -1]);
+  const selectedCell = ref<[number, number]>([-1, -1]);
   const selectedCellNumber = ref<number>(0);
 
   // 選択されたセルの座標が変化したとき
@@ -81,7 +81,7 @@
     // どのセルも選択されていないとき，セルの値を1000とする
     selectedCellNumber.value =
       selectedCell.value[0] >= 0
-        ? cellData.value[selectedCell.value[0]][selectedCell.value[1]]
+        ? (cellData.value[selectedCell.value[0]]?.[selectedCell.value[1]] ?? 1000)
         : 1000;
     // console.debug("selectedCellNumber.value", selectedCellNumber.value);
   });
@@ -119,7 +119,7 @@
    * setTimeout の戻り値を保管
    * (タイムアウトをクリアできるようにする)
    */
-  const timeoutId = ref<NodeJS.Timeout>(); // setTimeout の ID を保持
+  const timeoutId = ref<ReturnType<typeof setTimeout>>(); // setTimeout の ID を保持
 
   /**
    * 通知を表示
@@ -153,7 +153,10 @@
   const scheduleHideNotification = (id: number): void => {
     // 以前のタイムアウトをクリア
     clearTimeout(timeoutId.value);
-    notification.value = [...notificationData[id]];
+    const entry = notificationData[id];
+    if (entry !== undefined) {
+      notification.value = entry;
+    }
 
     // タイムアウトのIDを記録
     timeoutId.value = setTimeout(() => {
@@ -222,8 +225,10 @@
    */
   const submitButtonOnClick = (submittedNumber: number): void => {
     // 入力されたセルに値を代入
-    cellData.value[selectedCell.value[0]][selectedCell.value[1]] =
-      submittedNumber * side.value;
+    const row = cellData.value[selectedCell.value[0]];
+    if (row !== undefined) {
+      row[selectedCell.value[1]] = submittedNumber * side.value;
+    }
 
     // 手番を交代
     side.value = side.value * -1;
@@ -246,7 +251,7 @@
      * [ 1, -1], [ 1, 0], [ 1, 1]
      * ```
      */
-    const directions = [
+    const directions: [number, number][] = [
       [-1, -1],
       [-1, 0],
       [-1, 1],
@@ -264,7 +269,7 @@
         /**
          * 着目するセルの値
          */
-        const n = Math.abs(cellData.value[x][y]);
+        const n = Math.abs(cellData.value[x]?.[y] ?? 0);
 
         // 値が0の場合は繰り返しをスキップする
         if (n === 0) continue;
@@ -289,7 +294,7 @@
               break;
             }
 
-            const currentValue = Math.abs(cellData.value[nx][ny]);
+            const currentValue = Math.abs(cellData.value[nx]?.[ny] ?? 0);
 
             if (step === 1) {
               // 最初のセルは必ず n-1 でなければならない
@@ -322,7 +327,10 @@
       setTimeout(function () {
         // すべての探索が終わった後、一括で取り壊し（対象セルを0に更新）
         for (const coord of removedList) {
-          cellData.value[coord.x][coord.y] = 0;
+          const coordRow = cellData.value[coord.x];
+          if (coordRow !== undefined) {
+            coordRow[coord.y] = 0;
+          }
         }
       }, 2000);
     }

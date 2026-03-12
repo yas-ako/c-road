@@ -1,15 +1,18 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  // devtools: { enabled: true },
   devtools: { enabled: false },
 
-  vue: {
-    propsDestructure: true,
-  },
-
   srcDir: "src",
-  modules: ["@nuxtjs/tailwindcss"],
+  modules: ["@nuxt/eslint"],
   ssr: false,
+
+  css: ["~/assets/css/tailwind.css"],
+
+  postcss: {
+    plugins: {
+      "@tailwindcss/postcss": {},
+    },
+  },
 
   typescript: {
     typeCheck: true,

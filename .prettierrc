@@ -3,5 +3,6 @@
   "semi": true,
   "vueIndentScriptAndStyle": true,
   "trailingComma": "all",
-  "plugins": ["prettier-plugin-tailwindcss"]
+  "plugins": ["prettier-plugin-tailwindcss"],
+  "tailwindStylesheet": "./src/assets/css/tailwind.css"
 }
