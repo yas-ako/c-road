@@ -44,9 +44,11 @@
   import type { Direction } from "~/game/types";
   import { useGameStore } from "~/stores/game";
   import { useGameInteractionStore } from "~/stores/gameInteraction";
+  import { useGamePresentationStore } from "~/stores/gamePresentation";
 
   const game = useGameStore();
   const interaction = useGameInteractionStore();
+  const presentation = useGamePresentationStore();
 
   interface Props {
     /**
@@ -60,7 +62,9 @@
     x: cellX(tileProps.number),
     y: cellY(tileProps.number),
   }));
-  const cell = computed(() => getCell(game.displayBoard, coordinate.value));
+  const cell = computed(() =>
+    getCell(presentation.displayBoard, coordinate.value),
+  );
   const roadLevel = computed(() =>
     cell.value.kind === "road" ? cell.value.level : "",
   );
@@ -111,7 +115,7 @@
 
     for (const [pathIndex, direction] of pathDirections) {
       const nextCell = getCell(
-        game.displayBoard,
+        presentation.displayBoard,
         moveCoordinate(coordinate.value, direction),
       );
       result[pathIndex] =

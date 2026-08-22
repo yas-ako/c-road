@@ -4,10 +4,12 @@ import { computed, ref } from "vue";
 import { getCell } from "~/game/board";
 import { getRoadPlacementRule } from "~/game/rules/placement";
 import { useGameStore } from "~/stores/game";
+import { useGamePresentationStore } from "~/stores/gamePresentation";
 import { useNotificationStore } from "~/stores/notification";
 
 export const useGameInteractionStore = defineStore("game-interaction", () => {
   const game = useGameStore();
+  const presentation = useGamePresentationStore();
   const selectedCell = ref<[number, number]>([-1, -1]);
   const maxCellNumber = ref(10);
 
@@ -16,13 +18,13 @@ export const useGameInteractionStore = defineStore("game-interaction", () => {
     return (
       x >= 0 &&
       y >= 0 &&
-      !game.isBeingRemoved &&
+      !presentation.isBeingRemoved &&
       getCell(game.state.board, { x, y }).kind === "empty"
     );
   });
 
   function selectCell(x: number, y: number) {
-    if (game.isBeingRemoved) return;
+    if (presentation.isBeingRemoved) return;
 
     if (selectedCell.value[0] === x && selectedCell.value[1] === y) {
       selectedCell.value = [-1, -1];
@@ -42,9 +44,12 @@ export const useGameInteractionStore = defineStore("game-interaction", () => {
     if (!isEditable.value) return false;
 
     const [x, y] = selectedCell.value;
-    const wasPlaced = game.placeRoad({ x, y }, level);
-    if (wasPlaced) selectedCell.value = [-1, -1];
-    return wasPlaced;
+    const events = game.placeRoad({ x, y }, level);
+    if (events === undefined) return false;
+
+    presentation.present(events);
+    selectedCell.value = [-1, -1];
+    return true;
   }
 
   function reset() {

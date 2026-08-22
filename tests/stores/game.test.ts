@@ -1,5 +1,5 @@
 import { createPinia, setActivePinia } from "pinia";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 
 import { getCell, setCell } from "../../src/game/board";
 import { createInitialGameState } from "../../src/game/state";
@@ -8,33 +8,19 @@ import { useGameStore } from "../../src/stores/game";
 describe("game store", () => {
   beforeEach(() => {
     setActivePinia(createPinia());
-    vi.useFakeTimers();
   });
 
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
-  it("新しいゲーム状態の盤面を表示する", () => {
+  it("ゲームエンジンの初期局面を保持する", () => {
     const game = useGameStore();
 
-    expect(game.state.currentPlayer).toBe("blue");
-    expect(getCell(game.displayBoard, { x: 0, y: 0 })).toEqual({
-      kind: "empty",
-    });
+    expect(game.state).toEqual(createInitialGameState());
   });
 
-  it("道を配置して手番と表示盤面を更新する", () => {
+  it("道を配置し、発生したイベントを返す", () => {
     const game = useGameStore();
 
-    game.placeRoad({ x: 3, y: 4 }, 1);
-
+    expect(game.placeRoad({ x: 3, y: 4 }, 1)).toEqual([]);
     expect(getCell(game.state.board, { x: 3, y: 4 })).toEqual({
-      kind: "road",
-      color: "blue",
-      level: 1,
-    });
-    expect(getCell(game.displayBoard, { x: 3, y: 4 })).toEqual({
       kind: "road",
       color: "blue",
       level: 1,
@@ -42,51 +28,42 @@ describe("game store", () => {
     expect(game.state.currentPlayer).toBe("red");
   });
 
-  it("取り壊し前の盤面を表示し、時間経過後に確定盤面へ戻す", () => {
+  it("取り壊しを局面へ即時反映し、演出に必要なイベントを返す", () => {
     const game = useGameStore();
     const initial = createInitialGameState();
-    const withRoads = setCell(
-      setCell(
-        initial.board,
-        { x: 2, y: 6 },
-        {
-          kind: "road",
-          color: "red",
-          level: 3,
-        },
+    game.state = {
+      ...initial,
+      currentPlayer: "red",
+      board: setCell(
+        setCell(
+          initial.board,
+          { x: 2, y: 6 },
+          {
+            kind: "road",
+            color: "red",
+            level: 3,
+          },
+        ),
+        { x: 3, y: 6 },
+        { kind: "road", color: "red", level: 2 },
       ),
-      { x: 3, y: 6 },
-      { kind: "road", color: "red", level: 2 },
-    );
-    game.state = { ...initial, board: withRoads, currentPlayer: "red" };
+    };
 
-    game.placeRoad({ x: 4, y: 6 }, 3);
+    const events = game.placeRoad({ x: 4, y: 6 }, 3);
 
-    expect(game.isBeingRemoved).toBe(true);
+    expect(events).toHaveLength(1);
+    expect(events?.[0]?.type).toBe("demolition");
     expect(getCell(game.state.board, { x: 3, y: 6 })).toEqual({
-      kind: "empty",
-    });
-    expect(getCell(game.displayBoard, { x: 3, y: 6 })).toEqual({
-      kind: "road",
-      color: "red",
-      level: 2,
-    });
-
-    vi.advanceTimersByTime(2000);
-
-    expect(game.isBeingRemoved).toBe(false);
-    expect(getCell(game.displayBoard, { x: 3, y: 6 })).toEqual({
       kind: "empty",
     });
   });
 
-  it("リセットすると初期状態へ戻る", () => {
+  it("リセットすると初期局面へ戻る", () => {
     const game = useGameStore();
     game.placeRoad({ x: 3, y: 4 }, 1);
 
     game.reset();
 
     expect(game.state).toEqual(createInitialGameState());
-    expect(game.isBeingRemoved).toBe(false);
   });
 });
