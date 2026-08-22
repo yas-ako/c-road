@@ -1,142 +1,126 @@
-import { calcUpperLimit, calcDemolition } from "~/composables/useGameLogic";
+import { defineStore } from "pinia";
+import { computed, ref, shallowRef } from "vue";
+
+import { applyAction } from "~/game/actions";
+import { getCell } from "~/game/board";
+import { getRoadPlacementRule } from "~/game/rules/placement";
+import { createInitialGameState } from "~/game/state";
+import type { Board, Cell } from "~/game/types";
 import { useNotificationStore } from "~/stores/notification";
 
+function cellToLegacyNumber(cell: Cell): number {
+  if (cell.kind !== "road") return 0;
+  return cell.color === "blue" ? cell.level : -cell.level;
+}
+
+function boardToLegacyNumbers(board: Board): number[][] {
+  return board.map((row) => row.map(cellToLegacyNumber));
+}
+
 export const useGameStore = defineStore("game", () => {
-  // ────────────── State ──────────────
+  const state = shallowRef(createInitialGameState());
 
-  /**
-   * 13×13のマス目データ（青=正数, 赤=負数, 空=0）
-   */
-  const cellData = ref<number[][]>(
-    [...Array(13)].map(() => Array(13).fill(0)),
+  // Cell ベースの表示へ移行するまで、既存 UI 用の符号付き数値盤面を提供する。
+  const presentationBoard = shallowRef<Board>();
+  const legacyCellData = computed(() =>
+    boardToLegacyNumbers(presentationBoard.value ?? state.value.board),
   );
+  const side = computed(() => (state.value.currentPlayer === "blue" ? 1 : -1));
 
-  /**
-   * 手番（1=青, -1=赤）
-   */
-  const side = ref<number>(1);
-
-  /**
-   * 選択中のマスの座標（[-1, -1]=未選択）
-   */
   const selectedCell = ref<[number, number]>([-1, -1]);
-
-  /**
-   * 選択中のマスへの入力上限値
-   */
-  const maxCellNumber = ref<number>(10);
-
-  /**
-   * 取り壊し処理中フラグ（true中はタイル操作不可）
-   */
-  const isBeingRemoved = ref<boolean>(false);
-
-  /**
-   * 取り壊しタイマーのID（resetGame時にクリアするために保持）
-   */
+  const maxCellNumber = ref(10);
+  const isBeingRemoved = ref(false);
   let demolitionTimeoutId: ReturnType<typeof setTimeout> | undefined;
 
-  // ────────────── Getters ──────────────
-
-  /**
-   * 選択中のマスの現在値（未選択時は1000）
-   */
-  const selectedCellNumber = computed<number>(() => {
-    if (selectedCell.value[0] < 0) return 1000;
-    return cellData.value[selectedCell.value[0]]?.[selectedCell.value[1]] ?? 1000;
+  const selectedCellNumber = computed(() => {
+    const [x, y] = selectedCell.value;
+    if (x < 0 || y < 0) return 1000;
+    return cellToLegacyNumber(getCell(state.value.board, { x, y }));
   });
 
-  /**
-   * 数値入力が可能かどうか
-   */
-  const isEditable = computed<boolean>(
-    () =>
-      selectedCell.value[0] !== -1 &&
-      selectedCell.value[1] !== -1 &&
-      selectedCellNumber.value === 0,
+  const isEditable = computed(
+    () => selectedCellNumber.value === 0 && !isBeingRemoved.value,
   );
 
-  // ────────────── Actions ──────────────
-
-  /**
-   * タイル選択・解除
-   * 上限ルールの計算も行い、maxCellNumber を更新する
-   */
-  function selectCell(x: number, y: number): void {
+  function selectCell(x: number, y: number) {
     if (isBeingRemoved.value) return;
 
-    // 同じマスを再クリック → 選択解除
     if (selectedCell.value[0] === x && selectedCell.value[1] === y) {
       selectedCell.value = [-1, -1];
       return;
     }
 
-    const { maxNumber, notificationType } = calcUpperLimit(cellData.value, x, y);
-    maxCellNumber.value = maxNumber;
+    const placementRule = getRoadPlacementRule(state.value.board, { x, y });
+    maxCellNumber.value = placementRule.maxLevel;
     selectedCell.value = [x, y];
 
-    if (notificationType === 0) {
+    if (placementRule.limitedBySandwich) {
       useNotificationStore().show(0);
     }
   }
 
-  /**
-   * 数値を確定する
-   * 手番交代・取り壊しルールの計算・実行を行う
-   */
-  function submitMove(value: number): void {
+  function submitMove(level: number) {
     if (!isEditable.value) return;
 
     const [x, y] = selectedCell.value;
-    const row = cellData.value[x];
-    if (row) row[y] = value * side.value;
+    const result = applyAction(state.value, {
+      type: "place-road",
+      player: state.value.currentPlayer,
+      coordinate: { x, y },
+      level,
+    });
+    if (!result.success) return;
 
-    side.value *= -1;
-    selectedCell.value = [-1, -1];
-    isBeingRemoved.value = true;
-
-    clearTimeout(demolitionTimeoutId);
-    const removedList = calcDemolition(cellData.value);
-
-    if (removedList.length > 0) {
-      useNotificationStore().show(1);
-      demolitionTimeoutId = setTimeout(() => {
-        for (const coord of removedList) {
-          const r = cellData.value[coord.x];
-          if (r) r[coord.y] = 0;
-        }
-        isBeingRemoved.value = false;
-      }, 2000);
-    } else {
-      isBeingRemoved.value = false;
+    if (demolitionTimeoutId !== undefined) {
+      clearTimeout(demolitionTimeoutId);
     }
+
+    state.value = result.state;
+    selectedCell.value = [-1, -1];
+
+    const demolition = result.events.find(
+      (event) => event.type === "demolition",
+    );
+    if (demolition === undefined) {
+      presentationBoard.value = undefined;
+      isBeingRemoved.value = false;
+      return;
+    }
+
+    presentationBoard.value = demolition.boardBeforeDemolition;
+    isBeingRemoved.value = true;
+    useNotificationStore().show(1);
+    demolitionTimeoutId = setTimeout(() => {
+      presentationBoard.value = undefined;
+      isBeingRemoved.value = false;
+      demolitionTimeoutId = undefined;
+    }, 2000);
   }
 
-  /**
-   * ゲームをリセットする
-   */
-  function resetGame(): void {
-    clearTimeout(demolitionTimeoutId);
-    cellData.value = [...Array(13)].map(() => Array(13).fill(0));
-    side.value = 1;
+  function reset() {
+    if (demolitionTimeoutId !== undefined) {
+      clearTimeout(demolitionTimeoutId);
+      demolitionTimeoutId = undefined;
+    }
+    state.value = createInitialGameState();
+    presentationBoard.value = undefined;
     selectedCell.value = [-1, -1];
     maxCellNumber.value = 10;
     isBeingRemoved.value = false;
   }
 
   return {
-    // State
-    cellData,
+    state,
+    legacyCellData,
+    cellData: legacyCellData,
     side,
     selectedCell,
     maxCellNumber,
     isBeingRemoved,
-    // Getters
     selectedCellNumber,
     isEditable,
-    // Actions
     selectCell,
     submitMove,
-    resetGame,
+    reset,
   };
 });
