@@ -26,6 +26,17 @@ export function normalizeCoordinate(coordinate: Coordinate): Coordinate {
   };
 }
 
+export function isLogicalCoordinate(coordinate: Coordinate): boolean {
+  return (
+    Number.isInteger(coordinate.x) &&
+    Number.isInteger(coordinate.y) &&
+    coordinate.x >= 0 &&
+    coordinate.x < BOARD_SIZE &&
+    coordinate.y >= 0 &&
+    coordinate.y < BOARD_SIZE
+  );
+}
+
 export function moveCoordinate(
   coordinate: Coordinate,
   direction: Direction,

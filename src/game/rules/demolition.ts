@@ -1,4 +1,4 @@
-import { getCell, moveCoordinate } from "../board";
+import { getCell, moveCoordinate, setCell } from "../board";
 import {
   BOARD_SIZE,
   DIRECTIONS,
@@ -65,5 +65,18 @@ export function findDemolitionTargets(board: Board): Coordinate[] {
 
   return [...targets.values()].sort((first, second) =>
     first.x === second.x ? first.y - second.y : first.x - second.x,
+  );
+}
+
+export function removeRoads(
+  board: Board,
+  coordinates: readonly Coordinate[],
+): Board {
+  return coordinates.reduce(
+    (nextBoard, coordinate) =>
+      getCell(nextBoard, coordinate).kind === "road"
+        ? setCell(nextBoard, coordinate, { kind: "empty" })
+        : nextBoard,
+    board,
   );
 }
