@@ -43,8 +43,10 @@
   import { getCell, moveCoordinate } from "~/game/board";
   import type { Direction } from "~/game/types";
   import { useGameStore } from "~/stores/game";
+  import { useGameInteractionStore } from "~/stores/gameInteraction";
 
   const game = useGameStore();
+  const interaction = useGameInteractionStore();
 
   interface Props {
     /**
@@ -64,7 +66,7 @@
   );
 
   const cellColor = computed(() => {
-    const [selectedX, selectedY] = game.selectedCell;
+    const [selectedX, selectedY] = interaction.selectedCell;
     if (
       selectedX === coordinate.value.x &&
       selectedY === coordinate.value.y &&
@@ -124,7 +126,7 @@
    * タイルがクリックされたときの処理
    */
   function clickTile() {
-    game.selectCell(cellX(tileProps.number), cellY(tileProps.number));
+    interaction.selectCell(cellX(tileProps.number), cellY(tileProps.number));
   }
 </script>
 

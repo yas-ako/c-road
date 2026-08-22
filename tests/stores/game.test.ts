@@ -24,20 +24,10 @@ describe("game store", () => {
     });
   });
 
-  it("配置上限をゲームエンジンから取得する", () => {
-    const game = useGameStore();
-
-    game.selectCell(3, 4);
-
-    expect(game.selectedCell).toEqual([3, 4]);
-    expect(game.maxCellNumber).toBe(1);
-  });
-
   it("道を配置して手番と表示盤面を更新する", () => {
     const game = useGameStore();
 
-    game.selectCell(3, 4);
-    game.submitMove(1);
+    game.placeRoad({ x: 3, y: 4 }, 1);
 
     expect(getCell(game.state.board, { x: 3, y: 4 })).toEqual({
       kind: "road",
@@ -70,8 +60,7 @@ describe("game store", () => {
     );
     game.state = { ...initial, board: withRoads, currentPlayer: "red" };
 
-    game.selectCell(4, 6);
-    game.submitMove(3);
+    game.placeRoad({ x: 4, y: 6 }, 3);
 
     expect(game.isBeingRemoved).toBe(true);
     expect(getCell(game.state.board, { x: 3, y: 6 })).toEqual({
@@ -93,13 +82,11 @@ describe("game store", () => {
 
   it("リセットすると初期状態へ戻る", () => {
     const game = useGameStore();
-    game.selectCell(3, 4);
-    game.submitMove(1);
+    game.placeRoad({ x: 3, y: 4 }, 1);
 
     game.reset();
 
     expect(game.state).toEqual(createInitialGameState());
-    expect(game.selectedCell).toEqual([-1, -1]);
     expect(game.isBeingRemoved).toBe(false);
   });
 });

@@ -6,11 +6,12 @@
         <button
           class="my-auto rounded-md bg-slate-100 fill-current"
           :class="{
-            'hover:bg-gray-300': game.isEditable && selectedNumber > 1,
-            'cursor-default text-slate-300': !game.isEditable || selectedNumber === 1,
+            'hover:bg-gray-300': interaction.isEditable && selectedNumber > 1,
+            'cursor-default text-slate-300':
+              !interaction.isEditable || selectedNumber === 1,
           }"
           @click="
-            if (game.isEditable && selectedNumber > 1) {
+            if (interaction.isEditable && selectedNumber > 1) {
               selectedNumber--;
             }
           "
@@ -29,7 +30,7 @@
       <div class="grid h-full w-full grid-flow-row gap-3">
         <div
           class="mt-[max(2dvh,0.75rem)] text-center text-3xl"
-          :class="{ 'text-slate-300': !game.isEditable }"
+          :class="{ 'text-slate-300': !interaction.isEditable }"
         >
           {{ selectedNumber }}
         </div>
@@ -39,21 +40,22 @@
           type="range"
           class="input-range relative"
           :class="{
-            'input-range_gray': !game.isEditable || game.maxCellNumber === 1,
+            'input-range_gray':
+              !interaction.isEditable || interaction.maxCellNumber === 1,
           }"
           name="number_input"
           min="1"
-          :max="game.maxCellNumber"
+          :max="interaction.maxCellNumber"
           step="1"
-          :disabled="!game.isEditable"
+          :disabled="!interaction.isEditable"
         />
         <!-- 目盛り -->
         <div
           class="mb-[max(2dvh,0.75rem)] flex w-full justify-between text-xl"
-          :class="{ 'text-slate-300': !game.isEditable }"
+          :class="{ 'text-slate-300': !interaction.isEditable }"
         >
           <div>1</div>
-          <div>{{ game.maxCellNumber }}</div>
+          <div>{{ interaction.maxCellNumber }}</div>
         </div>
       </div>
       <!-- 右のボタン -->
@@ -62,12 +64,17 @@
           class="my-auto rounded-md bg-slate-100 fill-current"
           :class="{
             'hover:bg-gray-300':
-              game.isEditable && selectedNumber < game.maxCellNumber,
+              interaction.isEditable &&
+              selectedNumber < interaction.maxCellNumber,
             'cursor-default text-slate-300':
-              !game.isEditable || selectedNumber === game.maxCellNumber,
+              !interaction.isEditable ||
+              selectedNumber === interaction.maxCellNumber,
           }"
           @click="
-            if (game.isEditable && selectedNumber < game.maxCellNumber) {
+            if (
+              interaction.isEditable &&
+              selectedNumber < interaction.maxCellNumber
+            ) {
               selectedNumber++;
             }
           "
@@ -90,8 +97,8 @@
       class="flex aspect-square w-16 items-stretch lg:min-w-[20vw]"
       :class="{
         'bg-lime-400 text-lime-800 hover:bg-lime-500 active:bg-lime-600':
-          game.isEditable,
-        'cursor-default bg-slate-100 text-slate-300 ': !game.isEditable,
+          interaction.isEditable,
+        'cursor-default bg-slate-100 text-slate-300': !interaction.isEditable,
       }"
       @click="clickSubmitButton()"
     >
@@ -109,9 +116,9 @@
 </template>
 
 <script setup lang="ts" scoped>
-  import { useGameStore } from "~/stores/game";
+  import { useGameInteractionStore } from "~/stores/gameInteraction";
 
-  const game = useGameStore();
+  const interaction = useGameInteractionStore();
 
   /**
    * スライダーでユーザーが選んだ数値（UI状態のためローカルに保持）
@@ -119,13 +126,13 @@
   const selectedNumber = ref(1);
 
   function clickSubmitButton() {
-    if (!game.isEditable) return;
-    game.submitMove(selectedNumber.value);
+    if (!interaction.isEditable) return;
+    interaction.submitMove(selectedNumber.value);
   }
 
   // maxCellNumber が変わったらスライダーを1にリセット
   watch(
-    () => game.maxCellNumber,
+    () => interaction.maxCellNumber,
     () => {
       selectedNumber.value = 1;
     },
