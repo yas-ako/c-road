@@ -4,10 +4,6 @@ import { setCell } from "../../src/game/board";
 import { findDemolitionTargets } from "../../src/game/rules/demolition";
 import { getRoadPlacementRule } from "../../src/game/rules/placement";
 import type { Board, Coordinate } from "../../src/game/types";
-import {
-  calcDemolition,
-  calcUpperLimit,
-} from "../../src/composables/useGameLogic";
 
 const BOARD_SIZE = 13;
 
@@ -52,6 +48,7 @@ describe("getRoadPlacementRule", () => {
       name: "隣接道路なし",
       coordinate: { x: 6, y: 6 },
       arrange: () => createLegacyBoard(),
+      expected: { minLevel: 1, maxLevel: 1, limitedBySandwich: false },
     },
     {
       name: "色を無視した隣接最大値",
@@ -62,6 +59,7 @@ describe("getRoadPlacementRule", () => {
         board[7]![7] = 2;
         return board;
       },
+      expected: { minLevel: 1, maxLevel: 5, limitedBySandwich: false },
     },
     {
       name: "異なる色の同番号による挟み込み",
@@ -72,6 +70,7 @@ describe("getRoadPlacementRule", () => {
         board[7]![6] = -3;
         return board;
       },
+      expected: { minLevel: 1, maxLevel: 3, limitedBySandwich: true },
     },
     {
       name: "複数方向の挟み込み",
@@ -84,6 +83,7 @@ describe("getRoadPlacementRule", () => {
         board[6]![7] = -3;
         return board;
       },
+      expected: { minLevel: 1, maxLevel: 3, limitedBySandwich: true },
     },
     {
       name: "トーラス境界の挟み込み",
@@ -94,20 +94,13 @@ describe("getRoadPlacementRule", () => {
         board[1]![0] = -4;
         return board;
       },
+      expected: { minLevel: 1, maxLevel: 4, limitedBySandwich: true },
     },
-  ])("旧実装と同じ上限を返す: $name", ({ arrange, coordinate }) => {
+  ])("上限を返す: $name", ({ arrange, coordinate, expected }) => {
     const legacyBoard = arrange();
-    const legacyResult = calcUpperLimit(
-      legacyBoard,
-      coordinate.x,
-      coordinate.y,
+    expect(getRoadPlacementRule(toBoard(legacyBoard), coordinate)).toEqual(
+      expected,
     );
-
-    expect(getRoadPlacementRule(toBoard(legacyBoard), coordinate)).toEqual({
-      minLevel: 1,
-      maxLevel: legacyResult.maxNumber,
-      limitedBySandwich: legacyResult.notificationType === 0,
-    });
   });
 
   it("街と空きマスを上限計算から除外する", () => {
@@ -140,6 +133,7 @@ describe("findDemolitionTargets", () => {
         board[4]![6] = 3;
         return board;
       },
+      expected: [{ x: 3, y: 6 }],
     },
     {
       name: "複数マスと異なる色",
@@ -152,6 +146,11 @@ describe("findDemolitionTargets", () => {
         board[6]![6] = -4;
         return board;
       },
+      expected: [
+        { x: 3, y: 6 },
+        { x: 4, y: 6 },
+        { x: 5, y: 6 },
+      ],
     },
     {
       name: "斜め方向",
@@ -162,6 +161,7 @@ describe("findDemolitionTargets", () => {
         board[4]![4] = -3;
         return board;
       },
+      expected: [{ x: 3, y: 3 }],
     },
     {
       name: "トーラス境界越し",
@@ -172,6 +172,7 @@ describe("findDemolitionTargets", () => {
         board[1]![6] = 3;
         return board;
       },
+      expected: [{ x: 0, y: 6 }],
     },
     {
       name: "起点へ戻る一周",
@@ -181,15 +182,16 @@ describe("findDemolitionTargets", () => {
         for (let x = 1; x < BOARD_SIZE; x++) board[x]![6] = 2;
         return board;
       },
+      expected: Array.from({ length: BOARD_SIZE - 1 }, (_, index) => ({
+        x: index + 1,
+        y: 6,
+      })),
     },
-  ])("旧実装と同じ対象を重複なく返す: $name", ({ arrange }) => {
+  ])("対象を重複なく返す: $name", ({ arrange, expected }) => {
     const legacyBoard = arrange();
-    const legacyTargets = [
-      ...new Set(coordinateKeys(calcDemolition(legacyBoard))),
-    ].sort();
     const targets = findDemolitionTargets(toBoard(legacyBoard));
 
-    expect(coordinateKeys(targets)).toEqual(legacyTargets);
+    expect(coordinateKeys(targets)).toEqual(coordinateKeys(expected));
     expect(new Set(coordinateKeys(targets)).size).toBe(targets.length);
   });
 

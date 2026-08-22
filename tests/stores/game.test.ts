@@ -15,12 +15,13 @@ describe("game store", () => {
     vi.useRealTimers();
   });
 
-  it("新しいゲーム状態を既存 UI 用の盤面へ変換する", () => {
+  it("新しいゲーム状態の盤面を表示する", () => {
     const game = useGameStore();
 
     expect(game.state.currentPlayer).toBe("blue");
-    expect(game.side).toBe(1);
-    expect(game.cellData[0][0]).toBe(0);
+    expect(getCell(game.displayBoard, { x: 0, y: 0 })).toEqual({
+      kind: "empty",
+    });
   });
 
   it("配置上限をゲームエンジンから取得する", () => {
@@ -32,7 +33,7 @@ describe("game store", () => {
     expect(game.maxCellNumber).toBe(1);
   });
 
-  it("道を配置して手番と互換盤面を更新する", () => {
+  it("道を配置して手番と表示盤面を更新する", () => {
     const game = useGameStore();
 
     game.selectCell(3, 4);
@@ -43,9 +44,12 @@ describe("game store", () => {
       color: "blue",
       level: 1,
     });
-    expect(game.cellData[3][4]).toBe(1);
+    expect(getCell(game.displayBoard, { x: 3, y: 4 })).toEqual({
+      kind: "road",
+      color: "blue",
+      level: 1,
+    });
     expect(game.state.currentPlayer).toBe("red");
-    expect(game.side).toBe(-1);
   });
 
   it("取り壊し前の盤面を表示し、時間経過後に確定盤面へ戻す", () => {
@@ -73,12 +77,18 @@ describe("game store", () => {
     expect(getCell(game.state.board, { x: 3, y: 6 })).toEqual({
       kind: "empty",
     });
-    expect(game.cellData[3][6]).toBe(-2);
+    expect(getCell(game.displayBoard, { x: 3, y: 6 })).toEqual({
+      kind: "road",
+      color: "red",
+      level: 2,
+    });
 
     vi.advanceTimersByTime(2000);
 
     expect(game.isBeingRemoved).toBe(false);
-    expect(game.cellData[3][6]).toBe(0);
+    expect(getCell(game.displayBoard, { x: 3, y: 6 })).toEqual({
+      kind: "empty",
+    });
   });
 
   it("リセットすると初期状態へ戻る", () => {

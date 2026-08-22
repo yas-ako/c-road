@@ -5,41 +5,31 @@ import { applyAction } from "~/game/actions";
 import { getCell } from "~/game/board";
 import { getRoadPlacementRule } from "~/game/rules/placement";
 import { createInitialGameState } from "~/game/state";
-import type { Board, Cell } from "~/game/types";
+import type { Board } from "~/game/types";
 import { useNotificationStore } from "~/stores/notification";
-
-function cellToLegacyNumber(cell: Cell): number {
-  if (cell.kind !== "road") return 0;
-  return cell.color === "blue" ? cell.level : -cell.level;
-}
-
-function boardToLegacyNumbers(board: Board): number[][] {
-  return board.map((row) => row.map(cellToLegacyNumber));
-}
 
 export const useGameStore = defineStore("game", () => {
   const state = shallowRef(createInitialGameState());
 
-  // Cell ベースの表示へ移行するまで、既存 UI 用の符号付き数値盤面を提供する。
   const presentationBoard = shallowRef<Board>();
-  const legacyCellData = computed(() =>
-    boardToLegacyNumbers(presentationBoard.value ?? state.value.board),
+  const displayBoard = computed(
+    () => presentationBoard.value ?? state.value.board,
   );
-  const side = computed(() => (state.value.currentPlayer === "blue" ? 1 : -1));
 
   const selectedCell = ref<[number, number]>([-1, -1]);
   const maxCellNumber = ref(10);
   const isBeingRemoved = ref(false);
   let demolitionTimeoutId: ReturnType<typeof setTimeout> | undefined;
 
-  const selectedCellNumber = computed(() => {
+  const selectedCellIsEmpty = computed(() => {
     const [x, y] = selectedCell.value;
-    if (x < 0 || y < 0) return 1000;
-    return cellToLegacyNumber(getCell(state.value.board, { x, y }));
+    return (
+      x >= 0 && y >= 0 && getCell(state.value.board, { x, y }).kind === "empty"
+    );
   });
 
   const isEditable = computed(
-    () => selectedCellNumber.value === 0 && !isBeingRemoved.value,
+    () => selectedCellIsEmpty.value && !isBeingRemoved.value,
   );
 
   function selectCell(x: number, y: number) {
@@ -111,13 +101,10 @@ export const useGameStore = defineStore("game", () => {
 
   return {
     state,
-    legacyCellData,
-    cellData: legacyCellData,
-    side,
+    displayBoard,
     selectedCell,
     maxCellNumber,
     isBeingRemoved,
-    selectedCellNumber,
     isEditable,
     selectCell,
     submitMove,

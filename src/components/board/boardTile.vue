@@ -12,13 +12,7 @@
     >
       <!-- 数字 -->
       <div class="z-5 mx-auto my-auto text-[min(4.2vmin,27px)]">
-        {{
-          Math.abs(
-            game.cellData[cellX(tileProps.number)]?.[
-              cellY(tileProps.number)
-            ] ?? 0,
-          )
-        }}
+        {{ roadLevel }}
       </div>
     </div>
     <!-- まわりに伸びる道(8本用意する, 4は無し) -->
@@ -46,7 +40,8 @@
 
 <script lang="ts" setup scoped>
   import { cellX, cellY, isInEdge } from "~/composables/useCellCoords";
-  import { DIRECTIONS } from "~/composables/useGameLogic";
+  import { getCell, moveCoordinate } from "~/game/board";
+  import type { Direction } from "~/game/types";
   import { useGameStore } from "~/stores/game";
 
   const game = useGameStore();
@@ -59,16 +54,33 @@
   }
   const tileProps = defineProps<Props>();
 
-  /**
-   * 現在のセルの色
-   */
-  const cellColor = ref<
-    | "cell_none"
-    | "cell_blue"
-    | "cell_red"
-    | "cell_blue_selected"
-    | "cell_red_selected"
-  >("cell_none");
+  const coordinate = computed(() => ({
+    x: cellX(tileProps.number),
+    y: cellY(tileProps.number),
+  }));
+  const cell = computed(() => getCell(game.displayBoard, coordinate.value));
+  const roadLevel = computed(() =>
+    cell.value.kind === "road" ? cell.value.level : "",
+  );
+
+  const cellColor = computed(() => {
+    const [selectedX, selectedY] = game.selectedCell;
+    if (
+      selectedX === coordinate.value.x &&
+      selectedY === coordinate.value.y &&
+      cell.value.kind === "empty"
+    ) {
+      return game.state.currentPlayer === "blue"
+        ? "cell_blue_selected"
+        : "cell_red_selected";
+    }
+
+    if (cell.value.kind === "road") {
+      return cell.value.color === "blue" ? "cell_blue" : "cell_red";
+    }
+
+    return "cell_none";
+  });
 
   /**
    * 周囲の8マスのうち，つながっているマスの番号にtrueが代入される
@@ -79,7 +91,34 @@
    * 6  7  8
    * ```
    */
-  const nextCells = ref<boolean[]>(new Array(9).fill(false));
+  const pathDirections: ReadonlyArray<readonly [number, Direction]> = [
+    [0, { x: -1, y: -1 }],
+    [1, { x: 0, y: -1 }],
+    [2, { x: 1, y: -1 }],
+    [3, { x: -1, y: 0 }],
+    [5, { x: 1, y: 0 }],
+    [6, { x: -1, y: 1 }],
+    [7, { x: 0, y: 1 }],
+    [8, { x: 1, y: 1 }],
+  ];
+
+  const nextCells = computed(() => {
+    const result = new Array<boolean>(9).fill(false);
+    const currentCell = cell.value;
+    if (currentCell.kind !== "road") return result;
+
+    for (const [pathIndex, direction] of pathDirections) {
+      const nextCell = getCell(
+        game.displayBoard,
+        moveCoordinate(coordinate.value, direction),
+      );
+      result[pathIndex] =
+        nextCell.kind === "road" &&
+        nextCell.color === currentCell.color &&
+        Math.abs(nextCell.level - currentCell.level) <= 1;
+    }
+    return result;
+  });
 
   /**
    * タイルがクリックされたときの処理
@@ -87,45 +126,6 @@
   function clickTile() {
     game.selectCell(cellX(tileProps.number), cellY(tileProps.number));
   }
-
-  // セルの色を更新する
-  watchEffect(() => {
-    const x = cellX(tileProps.number);
-    const y = cellY(tileProps.number);
-    const cellNumber = game.cellData[x]?.[y] ?? 0;
-
-    if (
-      game.selectedCell[0] === x &&
-      game.selectedCell[1] === y &&
-      (game.cellData[game.selectedCell[0]]?.[game.selectedCell[1]] ?? -1) === 0
-    ) {
-      cellColor.value = game.side === 1 ? "cell_blue_selected" : "cell_red_selected";
-    } else if (cellNumber > 0) {
-      cellColor.value = "cell_blue";
-    } else if (cellNumber < 0) {
-      cellColor.value = "cell_red";
-    } else {
-      cellColor.value = "cell_none";
-    }
-  });
-
-  // 周囲のセルとの道を更新する
-  watchEffect(() => {
-    const x = cellX(tileProps.number);
-    const y = cellY(tileProps.number);
-
-    for (const [keyStr, [dx, dy]] of Object.entries(DIRECTIONS)) {
-      const key = Number(keyStr);
-      const nextX = (x + dx + 13) % 13;
-      const nextY = (y + dy + 13) % 13;
-
-      const currentValue = game.cellData[x]?.[y] ?? 0;
-      const nextCellValue = game.cellData[nextX]?.[nextY] ?? 0;
-
-      nextCells.value[key] =
-        Math.abs(currentValue - nextCellValue) <= 1 && nextCellValue !== 0;
-    }
-  });
 </script>
 
 <style lang="scss">
