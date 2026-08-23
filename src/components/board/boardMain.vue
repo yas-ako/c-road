@@ -13,7 +13,7 @@
   </transition>
   <main class="mx-4 flex-grow overflow-scroll">
     <div
-      class="game-board mx-auto grid h-[160vmin] max-h-[64rem] w-[160vmin] max-w-5xl grid-cols-[repeat(15,minmax(0,1fr))] border border-gray-300"
+      class="game-board mx-auto grid h-[160vmin] max-h-[64rem] w-[160vmin] max-w-5xl grid-cols-[repeat(15,minmax(0,1fr))] grid-rows-[repeat(15,minmax(0,1fr))] border border-gray-300"
     >
       <BoardTile
         v-for="(_, index) in 225"
