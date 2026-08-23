@@ -26,6 +26,11 @@ export const DIRECTIONS: readonly Direction[] = [
 
 export type TownId = "north-west" | "south-east";
 
+export const TOWN_ANCHORS: Readonly<Record<TownId, Coordinate>> = {
+  "north-west": { x: 2, y: 2 },
+  "south-east": { x: BOARD_SIZE - 3, y: BOARD_SIZE - 3 },
+};
+
 export type Cell =
   | Readonly<{ kind: "empty" }>
   | Readonly<{ kind: "road"; color: PlayerColor; level: number }>
