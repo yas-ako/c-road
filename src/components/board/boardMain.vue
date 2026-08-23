@@ -72,8 +72,8 @@
     container-type: inline-size;
     aspect-ratio: 1;
     width: min(100%, calc(100dvh - 12rem), 48rem);
-    min-width: 30rem;
-    min-height: 30rem;
+    min-width: 42rem;
+    min-height: 42rem;
     margin: auto;
     flex: none;
     border: 1px solid rgb(203 213 225);
@@ -147,6 +147,13 @@
       strong {
         font-size: clamp(1rem, 3.5dvh, 1.25rem);
       }
+    }
+  }
+
+  @media (min-width: 56rem) {
+    .game-board {
+      min-width: 30rem;
+      min-height: 30rem;
     }
   }
 
