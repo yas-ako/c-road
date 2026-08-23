@@ -23,12 +23,21 @@
       />
     </div>
   </main>
-  <boardMenu />
+  <boardMenu v-if="game.state.phase === 'placing-roads'" />
+  <div v-else class="p-4 text-center text-lg">
+    {{
+      game.state.phase === "placing-north-west-town"
+        ? "青：左上の街の向きを選んでください"
+        : "赤：右下の街の向きを選んでください"
+    }}
+  </div>
 </template>
 
 <script setup lang="ts" scoped>
   import { useNotificationStore } from "~/stores/notification";
+  import { useGameStore } from "~/stores/game";
 
+  const game = useGameStore();
   const notification = useNotificationStore();
 </script>
 

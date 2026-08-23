@@ -15,6 +15,14 @@
         {{ roadLevel }}
       </div>
     </div>
+    <template v-if="cell.kind === 'town'">
+      <div
+        v-for="direction in townConnections"
+        :key="direction"
+        class="town-bridge absolute z-20 bg-gray-400"
+        :class="'town-bridge__' + direction"
+      ></div>
+    </template>
     <!-- まわりに伸びる道(8本用意する, 4は無し) -->
     <template v-for="i in [0, 1, 2, 3, 5, 6, 7, 8]" :key="i">
       <div
@@ -86,7 +94,33 @@
       return cell.value.color === "blue" ? "cell_blue" : "cell_red";
     }
 
+    if (cell.value.kind === "town") return "cell_town";
+    if (interaction.isTownCandidate(coordinate.value.x, coordinate.value.y)) {
+      return "cell_town_candidate";
+    }
+
     return "cell_none";
+  });
+
+  const townConnections = computed(() => {
+    if (cell.value.kind !== "town") return [];
+    const townId = cell.value.townId;
+
+    const directions = [
+      ["top", { x: 0, y: -1 }],
+      ["right", { x: 1, y: 0 }],
+      ["bottom", { x: 0, y: 1 }],
+      ["left", { x: -1, y: 0 }],
+    ] as const;
+    return directions
+      .filter(([, direction]) => {
+        const neighbor = getCell(
+          presentation.displayBoard,
+          moveCoordinate(coordinate.value, direction),
+        );
+        return neighbor.kind === "town" && neighbor.townId === townId;
+      })
+      .map(([name]) => name);
   });
 
   /**
@@ -165,6 +199,48 @@
     &_red_selected {
       border-color: var(--red-color-light);
       color: rgba(0, 0, 0, 0);
+    }
+
+    &_town {
+      border-color: rgb(75 85 99);
+      background-color: rgb(156 163 175);
+      color: transparent;
+    }
+
+    &_town_candidate {
+      border-color: rgb(156 163 175);
+      background-color: rgb(229 231 235);
+      color: transparent;
+    }
+  }
+
+  .town-bridge {
+    &__top {
+      top: 0;
+      left: 8.333333%;
+      height: calc(8.333333% + min(0.5vmin, 2.5px));
+      width: 83.333333%;
+    }
+
+    &__right {
+      top: 8.333333%;
+      right: 0;
+      height: 83.333333%;
+      width: calc(8.333333% + min(0.5vmin, 2.5px));
+    }
+
+    &__bottom {
+      bottom: 0;
+      left: 8.333333%;
+      height: calc(8.333333% + min(0.5vmin, 2.5px));
+      width: 83.333333%;
+    }
+
+    &__left {
+      top: 8.333333%;
+      left: 0;
+      height: 83.333333%;
+      width: calc(8.333333% + min(0.5vmin, 2.5px));
     }
   }
 

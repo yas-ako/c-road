@@ -2,11 +2,24 @@ import { defineStore } from "pinia";
 import { shallowRef } from "vue";
 
 import { applyAction, type GameEvent } from "~/game/actions";
-import { createInitialGameState } from "~/game/state";
-import type { Coordinate } from "~/game/types";
+import { createTownSetupGameState } from "~/game/state";
+import type { Coordinate, TownId } from "~/game/types";
 
 export const useGameStore = defineStore("game", () => {
-  const state = shallowRef(createInitialGameState());
+  const state = shallowRef(createTownSetupGameState());
+
+  function extendTown(townId: TownId, coordinate: Coordinate): boolean {
+    const result = applyAction(state.value, {
+      type: "extend-town",
+      player: state.value.currentPlayer,
+      townId,
+      coordinate,
+    });
+    if (!result.success) return false;
+
+    state.value = result.state;
+    return true;
+  }
 
   function placeRoad(
     coordinate: Coordinate,
@@ -25,8 +38,8 @@ export const useGameStore = defineStore("game", () => {
   }
 
   function reset() {
-    state.value = createInitialGameState();
+    state.value = createTownSetupGameState();
   }
 
-  return { state, placeRoad, reset };
+  return { state, extendTown, placeRoad, reset };
 });

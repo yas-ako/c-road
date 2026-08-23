@@ -2,7 +2,10 @@ import { createPinia, setActivePinia } from "pinia";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { getCell, setCell } from "../../src/game/board";
-import { createInitialGameState } from "../../src/game/state";
+import {
+  createInitialGameState,
+  createTownSetupGameState,
+} from "../../src/game/state";
 import { useGameStore } from "../../src/stores/game";
 
 describe("game store", () => {
@@ -13,11 +16,22 @@ describe("game store", () => {
   it("ゲームエンジンの初期局面を保持する", () => {
     const game = useGameStore();
 
-    expect(game.state).toEqual(createInitialGameState());
+    expect(game.state).toEqual(createTownSetupGameState());
+  });
+
+  it("青、赤の順に街を完成させる", () => {
+    const game = useGameStore();
+
+    expect(game.extendTown("north-west", { x: 3, y: 2 })).toBe(true);
+    expect(game.extendTown("south-east", { x: 9, y: 10 })).toBe(true);
+
+    expect(game.state.phase).toBe("placing-roads");
+    expect(game.state.currentPlayer).toBe("blue");
   });
 
   it("道を配置し、発生したイベントを返す", () => {
     const game = useGameStore();
+    game.state = createInitialGameState();
 
     expect(game.placeRoad({ x: 3, y: 4 }, 1)).toEqual([]);
     expect(getCell(game.state.board, { x: 3, y: 4 })).toEqual({
@@ -60,10 +74,10 @@ describe("game store", () => {
 
   it("リセットすると初期局面へ戻る", () => {
     const game = useGameStore();
-    game.placeRoad({ x: 3, y: 4 }, 1);
+    game.extendTown("north-west", { x: 3, y: 2 });
 
     game.reset();
 
-    expect(game.state).toEqual(createInitialGameState());
+    expect(game.state).toEqual(createTownSetupGameState());
   });
 });

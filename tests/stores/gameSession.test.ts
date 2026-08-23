@@ -2,7 +2,7 @@ import { createPinia, setActivePinia } from "pinia";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { useGameSession } from "../../src/composables/useGameSession";
-import { createInitialGameState } from "../../src/game/state";
+import { createTownSetupGameState } from "../../src/game/state";
 import { useGameStore } from "../../src/stores/game";
 import { useGameInteractionStore } from "../../src/stores/gameInteraction";
 import { useGamePresentationStore } from "../../src/stores/gamePresentation";
@@ -25,13 +25,12 @@ describe("game session", () => {
     const notification = useNotificationStore();
     const session = useGameSession();
 
-    interaction.selectCell(3, 4);
-    interaction.submitMove(1);
+    interaction.selectCell(3, 2);
     notification.show(0);
 
     session.reset();
 
-    expect(game.state).toEqual(createInitialGameState());
+    expect(game.state).toEqual(createTownSetupGameState());
     expect(interaction.selectedCell).toEqual([-1, -1]);
     expect(interaction.maxCellNumber).toBe(10);
     expect(presentation.isBeingRemoved).toBe(false);
