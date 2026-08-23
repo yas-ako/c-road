@@ -12,7 +12,7 @@
       :class="cellColor"
     >
       <!-- 数字 -->
-      <div class="z-5 mx-auto my-auto text-[min(4.2vmin,27px)]">
+      <div class="cell-number z-5 mx-auto my-auto">
         {{ roadLevel }}
       </div>
     </div>
@@ -222,6 +222,11 @@
       background-color: rgb(229 231 235);
       color: transparent;
     }
+  }
+
+  .cell-number {
+    font-size: clamp(1rem, 3.6cqi, 1.6875rem);
+    line-height: 1;
   }
 
   .town-bridge {

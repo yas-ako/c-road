@@ -56,21 +56,25 @@
   }
 
   .board-viewport {
-    display: grid;
+    display: flex;
     flex: 1;
-    place-items: center;
     min-width: 0;
     min-height: 0;
     overflow: auto;
     padding: 0.5rem;
+    overscroll-behavior: contain;
   }
 
   .game-board {
     display: grid;
     grid-template-columns: repeat(15, minmax(0, 1fr));
     grid-template-rows: repeat(15, minmax(0, 1fr));
+    container-type: inline-size;
     aspect-ratio: 1;
     width: min(100%, calc(100dvh - 12rem), 48rem);
+    min-width: 30rem;
+    min-height: 30rem;
+    margin: auto;
     flex: none;
     border: 1px solid rgb(203 213 225);
     background-color: #e7e7e7;
@@ -141,7 +145,7 @@
       box-shadow: none;
 
       strong {
-        font-size: 1.25rem;
+        font-size: clamp(1rem, 3.5dvh, 1.25rem);
       }
     }
   }
