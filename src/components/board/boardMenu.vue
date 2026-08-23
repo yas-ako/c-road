@@ -36,7 +36,7 @@
         </div>
         <!-- スライダー -->
         <input
-          v-model="selectedNumber"
+          v-model.number="selectedNumber"
           type="range"
           class="input-range relative"
           :class="{
