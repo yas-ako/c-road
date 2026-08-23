@@ -11,26 +11,30 @@
       <p>{{ notification.text[1] }}</p>
     </div>
   </transition>
-  <main class="mx-4 flex-grow overflow-scroll">
-    <div
-      class="game-board mx-auto grid h-[160vmin] max-h-[64rem] w-[160vmin] max-w-5xl grid-cols-[repeat(15,minmax(0,1fr))] grid-rows-[repeat(15,minmax(0,1fr))] border border-gray-300"
-    >
-      <BoardTile
-        v-for="(_, index) in 225"
-        :key="index"
-        class="grid-item border-[min(0.2vmin,2.048px)] border-white"
-        :number="index"
-      />
-    </div>
-  </main>
-  <boardMenu v-if="game.state.phase === 'placing-roads'" />
-  <div v-else class="p-4 text-center text-lg">
-    {{
-      game.state.phase === "placing-north-west-town"
-        ? "青：左上の街の向きを選んでください"
-        : "赤：右下の街の向きを選んでください"
-    }}
-  </div>
+  <section class="game-shell">
+    <main class="board-viewport">
+      <div class="game-board">
+        <BoardTile
+          v-for="(_, index) in 225"
+          :key="index"
+          class="grid-item border-[min(0.2vmin,2.048px)] border-white"
+          :number="index"
+        />
+      </div>
+    </main>
+    <aside class="control-panel">
+      <boardMenu v-if="game.state.phase === 'placing-roads'" />
+      <div v-else class="town-instruction">
+        <span class="town-instruction__turn">
+          {{
+            game.state.phase === "placing-north-west-town" ? "青の番" : "赤の番"
+          }}
+        </span>
+        <strong>街の向きを選んでください</strong>
+        <span>薄い灰色のマスを選択します</span>
+      </div>
+    </aside>
+  </section>
 </template>
 
 <script setup lang="ts" scoped>
@@ -41,9 +45,105 @@
   const notification = useNotificationStore();
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+  .game-shell {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    background: rgb(248 250 252);
+  }
+
+  .board-viewport {
+    display: grid;
+    flex: 1;
+    place-items: center;
+    min-width: 0;
+    min-height: 0;
+    overflow: auto;
+    padding: 0.5rem;
+  }
+
   .game-board {
+    display: grid;
+    grid-template-columns: repeat(15, minmax(0, 1fr));
+    grid-template-rows: repeat(15, minmax(0, 1fr));
+    aspect-ratio: 1;
+    width: min(100%, calc(100dvh - 12rem), 48rem);
+    flex: none;
+    border: 1px solid rgb(203 213 225);
     background-color: #e7e7e7;
+  }
+
+  .control-panel {
+    position: relative;
+    z-index: 20;
+    flex: none;
+  }
+
+  .town-instruction {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.875rem max(1rem, env(safe-area-inset-right))
+      max(0.875rem, env(safe-area-inset-bottom))
+      max(1rem, env(safe-area-inset-left));
+    border-top: 1px solid rgb(226 232 240);
+    color: rgb(51 65 85);
+    background: white;
+    box-shadow: 0 -0.25rem 1rem rgb(15 23 42 / 8%);
+
+    &__turn {
+      color: rgb(71 85 105);
+      font-size: 0.875rem;
+    }
+
+    strong {
+      font-size: 1rem;
+    }
+
+    span:last-child {
+      color: rgb(100 116 139);
+      font-size: 0.75rem;
+    }
+  }
+
+  @media (orientation: landscape), (min-width: 56rem) {
+    .game-shell {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) clamp(17rem, 28vw, 22rem);
+    }
+
+    .board-viewport {
+      padding: 0.75rem;
+    }
+
+    .game-board {
+      width: min(100%, calc(100dvh - 4.5rem), 64rem);
+    }
+
+    .control-panel {
+      min-width: 0;
+      min-height: 0;
+      overflow-y: auto;
+      border-left: 1px solid rgb(226 232 240);
+      background: white;
+    }
+
+    .town-instruction {
+      justify-content: center;
+      height: 100%;
+      padding: 1.5rem;
+      border-top: 0;
+      text-align: center;
+      box-shadow: none;
+
+      strong {
+        font-size: 1.25rem;
+      }
+    }
   }
 
   /* 通知のデザイン */

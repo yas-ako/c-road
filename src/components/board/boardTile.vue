@@ -3,6 +3,7 @@
   <div
     class="relative flex h-full w-full select-none"
     :class="{ 'border-gray-200 text-slate-200': isInEdge(tileProps.number) }"
+    :style="townBorderStyle"
     @click="clickTile"
   >
     <!-- 背景色が青と赤に変わる部分 -->
@@ -121,6 +122,15 @@
         return neighbor.kind === "town" && neighbor.townId === townId;
       })
       .map(([name]) => name);
+  });
+
+  const townBorderStyle = computed(() => {
+    const style: Record<string, string> = {};
+    for (const direction of townConnections.value) {
+      const property = `border${direction[0]?.toUpperCase()}${direction.slice(1)}Color`;
+      style[property] = "rgb(156 163 175)";
+    }
+    return style;
   });
 
   /**
