@@ -1,7 +1,14 @@
 <template>
   <BoardMain />
 </template>
-<script setup>
+<script setup lang="ts">
+  import { onBeforeUnmount, onMounted } from "vue";
+  import { onBeforeRouteLeave } from "vue-router";
+
+  import { useGameSession } from "~/composables/useGameSession";
+
+  const gameSession = useGameSession();
+
   // ページ遷移を防ぐ処理
   const confirmNavigation = () => window.confirm("本当にページを離れますか？");
 
@@ -14,16 +21,18 @@
     }
   });
 
+  const beforeUnloadHandler = (event: BeforeUnloadEvent) => {
+    event.preventDefault();
+    event.returnValue = "";
+  };
+
   // ページを再読み込みしようとしたとき，ページを閉じようとしたとき
   onMounted(() => {
-    const handler = (event) => {
-      event.preventDefault();
-      event.returnValue = "";
-    };
-    window.addEventListener("beforeunload", handler);
+    window.addEventListener("beforeunload", beforeUnloadHandler);
+  });
 
-    onBeforeUnmount(() => {
-      window.removeEventListener("beforeunload", handler);
-    });
+  onBeforeUnmount(() => {
+    window.removeEventListener("beforeunload", beforeUnloadHandler);
+    gameSession.reset();
   });
 </script>

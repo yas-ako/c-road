@@ -48,5 +48,15 @@ export const useNotificationStore = defineStore("notification", () => {
     }, 5000);
   }
 
-  return { text, isVisible, key, show };
+  function reset(): void {
+    clearTimeout(timeoutId);
+    clearTimeout(reshowTimeoutId);
+    timeoutId = undefined;
+    reshowTimeoutId = undefined;
+    text.value = ["", ""];
+    isVisible.value = false;
+    key.value = 0;
+  }
+
+  return { text, isVisible, key, show, reset };
 });
