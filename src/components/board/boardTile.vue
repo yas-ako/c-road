@@ -41,6 +41,7 @@
 <script lang="ts" setup scoped>
   import { cellX, cellY, isInEdge } from "~/composables/useCellCoords";
   import { getCell, moveCoordinate } from "~/game/board";
+  import { areRoadsConnected } from "~/game/rules/connectivity";
   import type { Direction } from "~/game/types";
   import { useGameStore } from "~/stores/game";
   import { useGameInteractionStore } from "~/stores/gameInteraction";
@@ -110,18 +111,12 @@
 
   const nextCells = computed(() => {
     const result = new Array<boolean>(9).fill(false);
-    const currentCell = cell.value;
-    if (currentCell.kind !== "road") return result;
-
     for (const [pathIndex, direction] of pathDirections) {
       const nextCell = getCell(
         presentation.displayBoard,
         moveCoordinate(coordinate.value, direction),
       );
-      result[pathIndex] =
-        nextCell.kind === "road" &&
-        nextCell.color === currentCell.color &&
-        Math.abs(nextCell.level - currentCell.level) <= 1;
+      result[pathIndex] = areRoadsConnected(cell.value, nextCell);
     }
     return result;
   });
