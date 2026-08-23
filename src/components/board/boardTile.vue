@@ -3,7 +3,6 @@
   <div
     class="relative flex h-full w-full select-none"
     :class="{ 'border-gray-200 text-slate-200': isInEdge(tileProps.number) }"
-    :style="townBorderStyle"
     @click="clickTile"
   >
     <!-- 背景色が青と赤に変わる部分 -->
@@ -16,14 +15,6 @@
         {{ roadLevel }}
       </div>
     </div>
-    <template v-if="cell.kind === 'town'">
-      <div
-        v-for="direction in townConnections"
-        :key="direction"
-        class="town-bridge absolute z-20 bg-gray-400"
-        :class="'town-bridge__' + direction"
-      ></div>
-    </template>
     <!-- まわりに伸びる道(8本用意する, 4は無し) -->
     <template v-for="i in [0, 1, 2, 3, 5, 6, 7, 8]" :key="i">
       <div
@@ -101,36 +92,6 @@
     }
 
     return "cell_none";
-  });
-
-  const townConnections = computed(() => {
-    if (cell.value.kind !== "town") return [];
-    const townId = cell.value.townId;
-
-    const directions = [
-      ["top", { x: 0, y: -1 }],
-      ["right", { x: 1, y: 0 }],
-      ["bottom", { x: 0, y: 1 }],
-      ["left", { x: -1, y: 0 }],
-    ] as const;
-    return directions
-      .filter(([, direction]) => {
-        const neighbor = getCell(
-          presentation.displayBoard,
-          moveCoordinate(coordinate.value, direction),
-        );
-        return neighbor.kind === "town" && neighbor.townId === townId;
-      })
-      .map(([name]) => name);
-  });
-
-  const townBorderStyle = computed(() => {
-    const style: Record<string, string> = {};
-    for (const direction of townConnections.value) {
-      const property = `border${direction[0]?.toUpperCase()}${direction.slice(1)}Color`;
-      style[property] = "rgb(156 163 175)";
-    }
-    return style;
   });
 
   /**
@@ -212,8 +173,8 @@
     }
 
     &_town {
-      border-color: rgb(75 85 99);
-      background-color: rgb(156 163 175);
+      border-color: transparent;
+      background-color: transparent;
       color: transparent;
     }
 
@@ -227,36 +188,6 @@
   .cell-number {
     font-size: clamp(1rem, 3.6cqi, 1.6875rem);
     line-height: 1;
-  }
-
-  .town-bridge {
-    &__top {
-      top: 0;
-      left: 8.333333%;
-      height: calc(8.333333% + min(0.5vmin, 2.5px));
-      width: 83.333333%;
-    }
-
-    &__right {
-      top: 8.333333%;
-      right: 0;
-      height: 83.333333%;
-      width: calc(8.333333% + min(0.5vmin, 2.5px));
-    }
-
-    &__bottom {
-      bottom: 0;
-      left: 8.333333%;
-      height: calc(8.333333% + min(0.5vmin, 2.5px));
-      width: 83.333333%;
-    }
-
-    &__left {
-      top: 8.333333%;
-      left: 0;
-      height: 83.333333%;
-      width: calc(8.333333% + min(0.5vmin, 2.5px));
-    }
   }
 
   /* pathの番号 */

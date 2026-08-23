@@ -20,6 +20,7 @@
           class="grid-item border-[min(0.2vmin,2.048px)] border-white"
           :number="index"
         />
+        <BoardTownLayer />
       </div>
     </main>
     <aside class="control-panel">
@@ -66,6 +67,7 @@
   }
 
   .game-board {
+    position: relative;
     display: grid;
     grid-template-columns: repeat(15, minmax(0, 1fr));
     grid-template-rows: repeat(15, minmax(0, 1fr));
