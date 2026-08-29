@@ -161,8 +161,8 @@
 
   /* 通知のデザイン */
   .notification {
-    z-index: 15;
     position: fixed;
+    z-index: 30;
     top: 70px;
     right: 20px;
     background: rgba(132, 204, 22, 0.8);
