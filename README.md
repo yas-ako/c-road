@@ -1,8 +1,23 @@
-# C*-road Project
+# C\*-road
 
-このプロジェクトは， C*-road というボードゲームを，ウェブブラウザでプレイできるようにするものです
+C*-road は、[@cyclemath](https://github.com/cyclemath) が考案した1対1のボードゲームです。このプロジェクトでは、C*-road をWebブラウザで遊べるようにします。
 
+ゲームは、先手・後手の明確な有利が生じにくく、運ではなく深い思考と戦略が結果を左右することを目指しています。
 
-## C*-road とは
+## ドキュメント
 
-[@cyclemath](https://github.com/cyclemath) が高校1年生の時に考案したボードゲームです
+- [ゲームルール](docs/rules.md)
+- [開発方針](docs/development.md)
+
+## 開発
+
+```bash
+npm install
+npm run dev
+```
+
+本番用ビルドは次のコマンドで確認できます。
+
+```bash
+npm run build
+```
