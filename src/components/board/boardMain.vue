@@ -14,17 +14,27 @@
   <section class="game-shell">
     <main class="board-viewport">
       <div class="game-board">
-        <BoardTile
-          v-for="(_, index) in 225"
-          :key="index"
-          class="grid-item border-[min(0.2vmin,2.048px)] border-white"
-          :number="index"
-        />
-        <BoardTownLayer />
+        <BoardRenderer />
       </div>
     </main>
     <aside class="control-panel">
-      <boardMenu v-if="game.state.phase === 'placing-roads'" />
+      <div v-if="visibleWinResult !== null" class="game-result" role="status">
+        <span class="game-result__label">勝者</span>
+        <strong :class="`game-result__winner--${visibleWinResult.winner}`">
+          {{ visibleWinResult.winner === "blue" ? "青" : "赤" }}の勝利
+        </strong>
+        <span class="game-result__description"
+          >2つの街を道路でつなぎました</span
+        >
+        <button
+          type="button"
+          class="game-result__restart"
+          @click="gameSession.reset"
+        >
+          新しいゲーム
+        </button>
+      </div>
+      <boardMenu v-else-if="game.state.phase === 'placing-roads'" />
       <div v-else class="town-instruction">
         <span class="town-instruction__turn">
           {{
@@ -39,11 +49,18 @@
 </template>
 
 <script setup lang="ts" scoped>
+  import { useGameSession } from "~/composables/useGameSession";
   import { useNotificationStore } from "~/stores/notification";
   import { useGameStore } from "~/stores/game";
+  import { useGamePresentationStore } from "~/stores/gamePresentation";
 
   const game = useGameStore();
   const notification = useNotificationStore();
+  const presentation = useGamePresentationStore();
+  const gameSession = useGameSession();
+  const visibleWinResult = computed(() =>
+    presentation.isBeingRemoved ? null : game.state.winResult,
+  );
 </script>
 
 <style lang="scss" scoped>
@@ -68,17 +85,12 @@
 
   .game-board {
     position: relative;
-    display: grid;
-    grid-template-columns: repeat(15, minmax(0, 1fr));
-    grid-template-rows: repeat(15, minmax(0, 1fr));
-    container-type: inline-size;
     aspect-ratio: 1;
     width: min(100%, calc(100dvh - 12rem), 48rem);
     min-width: 42rem;
     min-height: 42rem;
     margin: auto;
     flex: none;
-    border: 1px solid rgb(203 213 225);
     background-color: #e7e7e7;
   }
 
@@ -116,6 +128,56 @@
     }
   }
 
+  .game-result {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 1rem max(1rem, env(safe-area-inset-right))
+      max(1rem, env(safe-area-inset-bottom))
+      max(1rem, env(safe-area-inset-left));
+    border-top: 1px solid rgb(226 232 240);
+    background: white;
+    box-shadow: 0 -0.25rem 1rem rgb(15 23 42 / 8%);
+
+    &__label,
+    &__description {
+      color: rgb(100 116 139);
+      font-size: 0.75rem;
+    }
+
+    strong {
+      font-size: 1.25rem;
+    }
+
+    &__winner--blue {
+      color: var(--blue-color-dark);
+    }
+
+    &__winner--red {
+      color: var(--red-color-dark);
+    }
+
+    &__restart {
+      min-height: 2.75rem;
+      margin-top: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 0.75rem;
+      color: rgb(54 83 20);
+      font-weight: 700;
+      background: rgb(163 230 53);
+
+      &:hover {
+        background: rgb(132 204 22);
+      }
+
+      &:focus-visible {
+        outline: 3px solid rgb(132 204 22 / 45%);
+        outline-offset: 2px;
+      }
+    }
+  }
+
   @media (orientation: landscape), (min-width: 56rem) {
     .game-shell {
       display: grid;
@@ -149,6 +211,13 @@
       strong {
         font-size: clamp(1rem, 3.5dvh, 1.25rem);
       }
+    }
+
+    .game-result {
+      justify-content: center;
+      height: 100%;
+      border-top: 0;
+      box-shadow: none;
     }
   }
 
