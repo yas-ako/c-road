@@ -1,6 +1,7 @@
 import { getCell, isLogicalCoordinate, setCell } from "./board";
 import { findDemolitionTargets, removeRoads } from "./rules/demolition";
 import { getRoadPlacementRule } from "./rules/placement";
+import { findTownWin } from "./rules/townConnectivity";
 import { otherPlayer, type GameState } from "./state";
 import {
   TOWN_ANCHORS,
@@ -27,6 +28,7 @@ export type ExtendTownAction = Readonly<{
 export type GameAction = PlaceRoadAction | ExtendTownAction;
 
 export type InvalidActionReason =
+  | "game-is-over"
   | "wrong-player"
   | "wrong-phase"
   | "wrong-town"
@@ -64,6 +66,10 @@ export function validateAction(
   state: GameState,
   action: GameAction,
 ): ActionValidation {
+  if (state.winResult !== null) {
+    return { valid: false, reason: "game-is-over" };
+  }
+
   if (action.player !== state.currentPlayer) {
     return { valid: false, reason: "wrong-player" };
   }
@@ -144,6 +150,7 @@ export function applyAction(
             : "placing-roads",
         currentPlayer: action.townId === "north-west" ? "red" : "blue",
         turn: state.turn,
+        winResult: state.winResult,
       },
       events: [],
     };
@@ -156,6 +163,7 @@ export function applyAction(
   });
   const removedCells = findDemolitionTargets(boardBeforeDemolition);
   const board = removeRoads(boardBeforeDemolition, removedCells);
+  const winResult = findTownWin(board, action.player);
 
   const events: GameEvent[] =
     removedCells.length === 0
@@ -173,8 +181,12 @@ export function applyAction(
     state: {
       board,
       phase: state.phase,
-      currentPlayer: otherPlayer(state.currentPlayer),
+      currentPlayer:
+        winResult === null
+          ? otherPlayer(state.currentPlayer)
+          : state.currentPlayer,
       turn: state.turn + 1,
+      winResult,
     },
     events,
   };

@@ -32,6 +32,7 @@ export const useGameInteractionStore = defineStore("game-interaction", () => {
     return (
       x >= 0 &&
       y >= 0 &&
+      game.state.winResult === null &&
       game.state.phase === "placing-roads" &&
       !presentation.isBeingRemoved &&
       getCell(game.state.board, { x, y }).kind === "empty"
@@ -39,7 +40,7 @@ export const useGameInteractionStore = defineStore("game-interaction", () => {
   });
 
   function selectCell(x: number, y: number) {
-    if (presentation.isBeingRemoved) return;
+    if (presentation.isBeingRemoved || game.state.winResult !== null) return;
 
     if (activeTownId.value !== undefined) {
       if (isTownCandidate(x, y)) {

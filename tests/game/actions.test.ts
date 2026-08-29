@@ -2,7 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import { applyAction, validateAction } from "../../src/game/actions";
 import { getCell, setCell } from "../../src/game/board";
-import { createInitialGameState } from "../../src/game/state";
+import {
+  createInitialGameState,
+  createTownSetupGameState,
+} from "../../src/game/state";
 import type { GameState } from "../../src/game/state";
 
 function stateWithBoard(board: GameState["board"]): GameState {
@@ -158,6 +161,30 @@ describe("applyAction", () => {
     });
   });
 
+  it("勝利後の操作を拒否する", () => {
+    const initial = createInitialGameState();
+    const state: GameState = {
+      ...initial,
+      winResult: {
+        winner: "blue",
+        roadPath: [{ x: 3, y: 3 }],
+        townConnections: [
+          { townId: "north-west", roadCell: { x: 3, y: 3 } },
+          { townId: "south-east", roadCell: { x: 3, y: 3 } },
+        ],
+      },
+    };
+
+    expect(
+      validateAction(state, {
+        type: "place-road",
+        player: "blue",
+        coordinate: { x: 6, y: 6 },
+        level: 1,
+      }),
+    ).toEqual({ valid: false, reason: "game-is-over" });
+  });
+
   it("取り壊しを反映し、演出用の取り壊し前盤面を返す", () => {
     const initial = createInitialGameState();
     let board = setCell(
@@ -206,5 +233,111 @@ describe("applyAction", () => {
       kind: "empty",
     });
     expect(getCell(state.board, { x: 4, y: 6 })).toEqual({ kind: "empty" });
+  });
+
+  it("取り壊し後の盤面で勝利を確定し、手番を維持する", () => {
+    const initial = createTownSetupGameState();
+    let board = setCell(
+      setCell(
+        initial.board,
+        { x: 3, y: 2 },
+        {
+          kind: "town",
+          townId: "north-west",
+        },
+      ),
+      { x: 9, y: 10 },
+      { kind: "town", townId: "south-east" },
+    );
+    for (let value = 3; value <= 8; value++) {
+      board = setCell(
+        board,
+        { x: value, y: value },
+        {
+          kind: "road",
+          color: "blue",
+          level: 1,
+        },
+      );
+    }
+    const state: GameState = {
+      ...initial,
+      board,
+      phase: "placing-roads",
+    };
+
+    const result = applyAction(state, {
+      type: "place-road",
+      player: "blue",
+      coordinate: { x: 9, y: 9 },
+      level: 1,
+    });
+
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.state.winResult?.winner).toBe("blue");
+    expect(result.state.winResult?.roadPath).toEqual(
+      Array.from({ length: 7 }, (_, index) => ({
+        x: index + 3,
+        y: index + 3,
+      })),
+    );
+    expect(result.state.currentPlayer).toBe("blue");
+    expect(result.state.turn).toBe(1);
+  });
+
+  it("配置直後に街がつながっても、経路が取り壊されれば勝利にしない", () => {
+    const initial = createTownSetupGameState();
+    let board = setCell(
+      setCell(
+        initial.board,
+        { x: 3, y: 2 },
+        { kind: "town", townId: "north-west" },
+      ),
+      { x: 9, y: 10 },
+      { kind: "town", townId: "south-east" },
+    );
+    for (const coordinate of [
+      { x: 3, y: 3 },
+      { x: 6, y: 6 },
+      { x: 7, y: 7 },
+      { x: 8, y: 8 },
+      { x: 9, y: 9 },
+    ]) {
+      board = setCell(board, coordinate, {
+        kind: "road",
+        color: "blue",
+        level: 2,
+      });
+    }
+    board = setCell(
+      board,
+      { x: 4, y: 4 },
+      {
+        kind: "road",
+        color: "blue",
+        level: 1,
+      },
+    );
+    const state: GameState = {
+      ...initial,
+      board,
+      phase: "placing-roads",
+    };
+
+    const result = applyAction(state, {
+      type: "place-road",
+      player: "blue",
+      coordinate: { x: 5, y: 5 },
+      level: 2,
+    });
+
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.state.winResult).toBeNull();
+    expect(result.state.currentPlayer).toBe("red");
+    expect(getCell(result.state.board, { x: 4, y: 4 })).toEqual({
+      kind: "empty",
+    });
   });
 });
