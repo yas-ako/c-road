@@ -2,7 +2,7 @@ import { createPinia, setActivePinia } from "pinia";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { useGameSession } from "../../src/composables/useGameSession";
-import { createTownSetupGameState } from "../../src/game/state";
+import { createTownConnectionInitialState } from "../../src/game/state";
 import { useGameStore } from "../../src/stores/game";
 import { useGameInteractionStore } from "../../src/stores/gameInteraction";
 import { useGamePresentationStore } from "../../src/stores/gamePresentation";
@@ -30,7 +30,7 @@ describe("game session", () => {
 
     session.reset();
 
-    expect(game.state).toEqual(createTownSetupGameState());
+    expect(game.state).toEqual(createTownConnectionInitialState());
     expect(interaction.selectedCell).toEqual([-1, -1]);
     expect(interaction.maxCellNumber).toBe(10);
     expect(presentation.isBeingRemoved).toBe(false);

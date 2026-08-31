@@ -2,9 +2,9 @@ import { createPinia, setActivePinia } from "pinia";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { getCell, setCell } from "../../src/game/board";
-import { createInitialGameState } from "../../src/game/state";
 import { useGameStore } from "../../src/stores/game";
 import { useGamePresentationStore } from "../../src/stores/gamePresentation";
+import { createTownRoadState } from "../helpers/gameState";
 
 describe("game presentation store", () => {
   beforeEach(() => {
@@ -19,7 +19,7 @@ describe("game presentation store", () => {
   it("取り壊し前の盤面を表示し、時間経過後に確定盤面へ戻す", () => {
     const game = useGameStore();
     const presentation = useGamePresentationStore();
-    const initial = createInitialGameState();
+    const initial = createTownRoadState();
     game.state = {
       ...initial,
       currentPlayer: "red",

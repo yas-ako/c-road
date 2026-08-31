@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { computed, ref, shallowRef } from "vue";
 
-import type { GameEvent } from "~/game/actions";
+import type { GameEvent } from "~/game/moveTypes";
 import type { Board } from "~/game/types";
 import { useGameStore } from "~/stores/game";
 import { useNotificationStore } from "~/stores/notification";

@@ -2,11 +2,9 @@ import { createPinia, setActivePinia } from "pinia";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { getCell, setCell } from "../../src/game/board";
-import {
-  createInitialGameState,
-  createTownSetupGameState,
-} from "../../src/game/state";
+import { createTownConnectionInitialState } from "../../src/game/state";
 import { useGameStore } from "../../src/stores/game";
+import { createTownRoadState } from "../helpers/gameState";
 
 describe("game store", () => {
   beforeEach(() => {
@@ -16,7 +14,7 @@ describe("game store", () => {
   it("ゲームエンジンの初期局面を保持する", () => {
     const game = useGameStore();
 
-    expect(game.state).toEqual(createTownSetupGameState());
+    expect(game.state).toEqual(createTownConnectionInitialState());
   });
 
   it("青、赤の順に街を完成させる", () => {
@@ -31,7 +29,7 @@ describe("game store", () => {
 
   it("道を配置し、発生したイベントを返す", () => {
     const game = useGameStore();
-    game.state = createInitialGameState();
+    game.state = createTownRoadState();
 
     expect(game.placeRoad({ x: 3, y: 4 }, 1)).toEqual([]);
     expect(getCell(game.state.board, { x: 3, y: 4 })).toEqual({
@@ -44,7 +42,7 @@ describe("game store", () => {
 
   it("取り壊しを局面へ即時反映し、演出に必要なイベントを返す", () => {
     const game = useGameStore();
-    const initial = createInitialGameState();
+    const initial = createTownRoadState();
     game.state = {
       ...initial,
       currentPlayer: "red",
@@ -72,12 +70,24 @@ describe("game store", () => {
     });
   });
 
+  it("現在の手番のプレイヤーが投了する", () => {
+    const game = useGameStore();
+
+    expect(game.resign()).toBe(true);
+    expect(game.state.result).toEqual({
+      type: "win",
+      condition: "resignation",
+      winner: "red",
+      resignedPlayer: "blue",
+    });
+  });
+
   it("リセットすると初期局面へ戻る", () => {
     const game = useGameStore();
     game.extendTown("north-west", { x: 3, y: 2 });
 
     game.reset();
 
-    expect(game.state).toEqual(createTownSetupGameState());
+    expect(game.state).toEqual(createTownConnectionInitialState());
   });
 });

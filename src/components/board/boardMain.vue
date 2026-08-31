@@ -18,14 +18,16 @@
       </div>
     </main>
     <aside class="control-panel">
-      <div v-if="visibleWinResult !== null" class="game-result" role="status">
-        <span class="game-result__label">勝者</span>
-        <strong :class="`game-result__winner--${visibleWinResult.winner}`">
-          {{ visibleWinResult.winner === "blue" ? "青" : "赤" }}の勝利
-        </strong>
-        <span class="game-result__description"
-          >2つの街を道路でつなぎました</span
+      <div v-if="visibleResult !== null" class="game-result" role="status">
+        <span class="game-result__label">{{ resultLabel }}</span>
+        <strong
+          v-if="visibleResult.type === 'win'"
+          :class="`game-result__winner--${visibleResult.winner}`"
         >
+          {{ visibleResult.winner === "blue" ? "青" : "赤" }}の勝利
+        </strong>
+        <strong v-else>引き分け</strong>
+        <span class="game-result__description">{{ resultDescription }}</span>
         <button
           type="button"
           class="game-result__restart"
@@ -58,9 +60,19 @@
   const notification = useNotificationStore();
   const presentation = useGamePresentationStore();
   const gameSession = useGameSession();
-  const visibleWinResult = computed(() =>
-    presentation.isBeingRemoved ? null : game.state.winResult,
+  const visibleResult = computed(() =>
+    presentation.isBeingRemoved ? null : game.state.result,
   );
+  const resultLabel = computed(() =>
+    visibleResult.value?.type === "draw" ? "結果" : "勝者",
+  );
+  const resultDescription = computed(() => {
+    const result = visibleResult.value;
+    if (result === null) return "";
+    if (result.type === "draw") return "道を置けるマスがなくなりました";
+    if (result.condition === "resignation") return "相手が投了しました";
+    return "2つの街を道路でつなぎました";
+  });
 </script>
 
 <style lang="scss" scoped>

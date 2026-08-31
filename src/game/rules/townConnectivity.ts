@@ -1,4 +1,5 @@
 import { getCell, moveCoordinate } from "../board";
+import type { TownConnectionWin, TownRoadConnection } from "../state";
 import {
   BOARD_SIZE,
   DIRECTIONS,
@@ -6,8 +7,6 @@ import {
   type Coordinate,
   type PlayerColor,
   type TownId,
-  type TownRoadConnection,
-  type WinResult,
 } from "../types";
 import { areRoadsConnected } from "./connectivity";
 
@@ -59,7 +58,7 @@ export function getAdjacentRoadsToTown(
 export function findTownWin(
   board: Board,
   color: PlayerColor,
-): WinResult | null {
+): TownConnectionWin | null {
   const startRoads = getAdjacentRoadsToTown(board, "north-west", color);
   const goalKeys = new Set(
     getAdjacentRoadsToTown(board, "south-east", color).map(coordinateKey),
@@ -117,5 +116,11 @@ export function findTownWin(
     { townId: "south-east", roadCell: lastRoad },
   ];
 
-  return { winner: color, roadPath, townConnections };
+  return {
+    type: "win",
+    condition: "town-connection",
+    winner: color,
+    roadPath,
+    townConnections,
+  };
 }
