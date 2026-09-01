@@ -5,11 +5,11 @@ import {
   findTownWin,
   getAdjacentRoadsToTown,
 } from "../../src/game/rules/townConnectivity";
-import { createTownSetupGameState } from "../../src/game/state";
+import { createTownConnectionInitialState } from "../../src/game/state";
 import type { Board, Coordinate, PlayerColor } from "../../src/game/types";
 
 function completeTowns(): Board {
-  const initial = createTownSetupGameState();
+  const initial = createTownConnectionInitialState();
   return setCell(
     setCell(
       initial.board,
@@ -82,6 +82,8 @@ describe("findTownWin", () => {
     );
 
     expect(findTownWin(board, "blue")).toEqual({
+      type: "win",
+      condition: "town-connection",
       winner: "blue",
       roadPath: coordinates,
       townConnections: [

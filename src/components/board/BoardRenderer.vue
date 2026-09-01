@@ -20,13 +20,20 @@
     return x < 0 || y < 0 ? undefined : { x, y };
   });
 
+  const townWin = computed(() => {
+    const result = game.state.result;
+    return result?.type === "win" && result.condition === "town-connection"
+      ? result
+      : null;
+  });
+
   const model = computed(() =>
     createBoardRenderModel({
       board: presentation.displayBoard,
       selectedCell: selectedCell.value,
       townCandidates: interaction.townCandidates,
       currentPlayer: game.state.currentPlayer,
-      winResult: presentation.isBeingRemoved ? null : game.state.winResult,
+      winResult: presentation.isBeingRemoved ? null : townWin.value,
     }),
   );
 </script>

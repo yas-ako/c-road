@@ -1,24 +1,26 @@
 import { describe, expect, it } from "vitest";
 
-import { applyAction, validateAction } from "../../src/game/actions";
 import { getCell, setCell } from "../../src/game/board";
+import { townConnectionGame } from "../../src/game/modes/townConnection/game";
 import {
-  createInitialGameState,
-  createTownSetupGameState,
+  createTownConnectionInitialState,
+  type TownConnectionGameState,
 } from "../../src/game/state";
-import type { GameState } from "../../src/game/state";
+import { createTownRoadState } from "../helpers/gameState";
 
-function stateWithBoard(board: GameState["board"]): GameState {
+function stateWithBoard(
+  board: TownConnectionGameState["board"],
+): TownConnectionGameState {
   return {
-    ...createInitialGameState(),
+    ...createTownRoadState(),
     board,
   };
 }
 
-describe("validateAction", () => {
+describe("townConnectionGame.validateMove", () => {
   it("空の盤面では青が道路番号1を置ける", () => {
     expect(
-      validateAction(createInitialGameState(), {
+      townConnectionGame.validateMove(createTownRoadState(), {
         type: "place-road",
         player: "blue",
         coordinate: { x: 6, y: 6 },
@@ -30,7 +32,7 @@ describe("validateAction", () => {
   it.each([
     {
       name: "手番外",
-      action: {
+      move: {
         type: "place-road" as const,
         player: "red" as const,
         coordinate: { x: 6, y: 6 },
@@ -40,7 +42,7 @@ describe("validateAction", () => {
     },
     {
       name: "盤面外",
-      action: {
+      move: {
         type: "place-road" as const,
         player: "blue" as const,
         coordinate: { x: -1, y: 6 },
@@ -50,7 +52,7 @@ describe("validateAction", () => {
     },
     {
       name: "小数座標",
-      action: {
+      move: {
         type: "place-road" as const,
         player: "blue" as const,
         coordinate: { x: 1.5, y: 6 },
@@ -60,7 +62,7 @@ describe("validateAction", () => {
     },
     {
       name: "道路番号0",
-      action: {
+      move: {
         type: "place-road" as const,
         player: "blue" as const,
         coordinate: { x: 6, y: 6 },
@@ -70,7 +72,7 @@ describe("validateAction", () => {
     },
     {
       name: "小数の道路番号",
-      action: {
+      move: {
         type: "place-road" as const,
         player: "blue" as const,
         coordinate: { x: 6, y: 6 },
@@ -80,7 +82,7 @@ describe("validateAction", () => {
     },
     {
       name: "上限超過",
-      action: {
+      move: {
         type: "place-road" as const,
         player: "blue" as const,
         coordinate: { x: 6, y: 6 },
@@ -88,8 +90,10 @@ describe("validateAction", () => {
       },
       reason: "road-level-exceeds-limit",
     },
-  ])("$name を拒否する", ({ action, reason }) => {
-    expect(validateAction(createInitialGameState(), action)).toEqual({
+  ])("$name を拒否する", ({ move, reason }) => {
+    expect(
+      townConnectionGame.validateMove(createTownRoadState(), move),
+    ).toEqual({
       valid: false,
       reason,
     });
@@ -105,13 +109,13 @@ describe("validateAction", () => {
       occupiedCell: { kind: "town", townId: "north-west" } as const,
     },
   ])("$name への上書きを拒否する", ({ occupiedCell }) => {
-    const initial = createInitialGameState();
+    const initial = createTownRoadState();
     const state = stateWithBoard(
       setCell(initial.board, { x: 6, y: 6 }, occupiedCell),
     );
 
     expect(
-      validateAction(state, {
+      townConnectionGame.validateMove(state, {
         type: "place-road",
         player: "blue",
         coordinate: { x: 6, y: 6 },
@@ -121,10 +125,10 @@ describe("validateAction", () => {
   });
 });
 
-describe("applyAction", () => {
+describe("townConnectionGame.applyMove", () => {
   it("道路を配置して手番とターンを進める", () => {
-    const initial = createInitialGameState();
-    const result = applyAction(initial, {
+    const initial = createTownRoadState();
+    const result = townConnectionGame.applyMove(initial, {
       type: "place-road",
       player: "blue",
       coordinate: { x: 6, y: 6 },
@@ -146,8 +150,8 @@ describe("applyAction", () => {
   });
 
   it("不正な操作では同じ局面を返す", () => {
-    const initial = createInitialGameState();
-    const result = applyAction(initial, {
+    const initial = createTownRoadState();
+    const result = townConnectionGame.applyMove(initial, {
       type: "place-road",
       player: "blue",
       coordinate: { x: 6, y: 6 },
@@ -162,10 +166,12 @@ describe("applyAction", () => {
   });
 
   it("勝利後の操作を拒否する", () => {
-    const initial = createInitialGameState();
-    const state: GameState = {
+    const initial = createTownRoadState();
+    const state: TownConnectionGameState = {
       ...initial,
-      winResult: {
+      result: {
+        type: "win",
+        condition: "town-connection",
         winner: "blue",
         roadPath: [{ x: 3, y: 3 }],
         townConnections: [
@@ -176,7 +182,7 @@ describe("applyAction", () => {
     };
 
     expect(
-      validateAction(state, {
+      townConnectionGame.validateMove(state, {
         type: "place-road",
         player: "blue",
         coordinate: { x: 6, y: 6 },
@@ -186,7 +192,7 @@ describe("applyAction", () => {
   });
 
   it("取り壊しを反映し、演出用の取り壊し前盤面を返す", () => {
-    const initial = createInitialGameState();
+    const initial = createTownRoadState();
     let board = setCell(
       initial.board,
       { x: 2, y: 6 },
@@ -207,7 +213,7 @@ describe("applyAction", () => {
     );
     const state = stateWithBoard(board);
 
-    const result = applyAction(state, {
+    const result = townConnectionGame.applyMove(state, {
       type: "place-road",
       player: "blue",
       coordinate: { x: 4, y: 6 },
@@ -236,7 +242,7 @@ describe("applyAction", () => {
   });
 
   it("取り壊し後の盤面で勝利を確定し、手番を維持する", () => {
-    const initial = createTownSetupGameState();
+    const initial = createTownConnectionInitialState();
     let board = setCell(
       setCell(
         initial.board,
@@ -260,13 +266,13 @@ describe("applyAction", () => {
         },
       );
     }
-    const state: GameState = {
+    const state: TownConnectionGameState = {
       ...initial,
       board,
       phase: "placing-roads",
     };
 
-    const result = applyAction(state, {
+    const result = townConnectionGame.applyMove(state, {
       type: "place-road",
       player: "blue",
       coordinate: { x: 9, y: 9 },
@@ -275,8 +281,11 @@ describe("applyAction", () => {
 
     expect(result.success).toBe(true);
     if (!result.success) return;
-    expect(result.state.winResult?.winner).toBe("blue");
-    expect(result.state.winResult?.roadPath).toEqual(
+    expect(result.state.result?.type).toBe("win");
+    expect(result.state.result?.condition).toBe("town-connection");
+    if (result.state.result?.condition !== "town-connection") return;
+    expect(result.state.result.winner).toBe("blue");
+    expect(result.state.result.roadPath).toEqual(
       Array.from({ length: 7 }, (_, index) => ({
         x: index + 3,
         y: index + 3,
@@ -287,7 +296,7 @@ describe("applyAction", () => {
   });
 
   it("配置直後に街がつながっても、経路が取り壊されれば勝利にしない", () => {
-    const initial = createTownSetupGameState();
+    const initial = createTownConnectionInitialState();
     let board = setCell(
       setCell(
         initial.board,
@@ -319,13 +328,13 @@ describe("applyAction", () => {
         level: 1,
       },
     );
-    const state: GameState = {
+    const state: TownConnectionGameState = {
       ...initial,
       board,
       phase: "placing-roads",
     };
 
-    const result = applyAction(state, {
+    const result = townConnectionGame.applyMove(state, {
       type: "place-road",
       player: "blue",
       coordinate: { x: 5, y: 5 },
@@ -334,7 +343,7 @@ describe("applyAction", () => {
 
     expect(result.success).toBe(true);
     if (!result.success) return;
-    expect(result.state.winResult).toBeNull();
+    expect(result.state.result).toBeNull();
     expect(result.state.currentPlayer).toBe("red");
     expect(getCell(result.state.board, { x: 4, y: 4 })).toEqual({
       kind: "empty",

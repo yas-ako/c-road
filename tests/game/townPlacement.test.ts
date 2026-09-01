@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vitest";
 
-import { applyAction, validateAction } from "../../src/game/actions";
 import { getCell } from "../../src/game/board";
+import { townConnectionGame } from "../../src/game/modes/townConnection/game";
 import { getTownExtensionCandidates } from "../../src/game/rules/townPlacement";
-import { createTownSetupGameState } from "../../src/game/state";
+import { createTownConnectionInitialState } from "../../src/game/state";
 import { TOWN_ANCHORS } from "../../src/game/types";
 
 describe("town setup", () => {
   it("左上と右下の固定マスを配置した状態で開始する", () => {
-    const state = createTownSetupGameState();
+    const state = createTownConnectionInitialState();
 
     expect(state.phase).toBe("placing-north-west-town");
     expect(state.currentPlayer).toBe("blue");
@@ -24,7 +24,10 @@ describe("town setup", () => {
 
   it("固定マスの上下左右を候補として返す", () => {
     expect(
-      getTownExtensionCandidates(createTownSetupGameState(), "north-west"),
+      getTownExtensionCandidates(
+        createTownConnectionInitialState(),
+        "north-west",
+      ),
     ).toEqual([
       { x: 2, y: 1 },
       { x: 1, y: 2 },
@@ -34,8 +37,8 @@ describe("town setup", () => {
   });
 
   it("青、赤の順で街を完成させ、道路配置へ移る", () => {
-    const initial = createTownSetupGameState();
-    const northWest = applyAction(initial, {
+    const initial = createTownConnectionInitialState();
+    const northWest = townConnectionGame.applyMove(initial, {
       type: "extend-town",
       player: "blue",
       townId: "north-west",
@@ -46,7 +49,7 @@ describe("town setup", () => {
     expect(northWest.state.phase).toBe("placing-south-east-town");
     expect(northWest.state.currentPlayer).toBe("red");
 
-    const southEast = applyAction(northWest.state, {
+    const southEast = townConnectionGame.applyMove(northWest.state, {
       type: "extend-town",
       player: "red",
       townId: "south-east",
@@ -62,7 +65,7 @@ describe("town setup", () => {
   it.each([
     {
       name: "斜めのマス",
-      action: {
+      move: {
         type: "extend-town" as const,
         player: "blue" as const,
         townId: "north-west" as const,
@@ -72,7 +75,7 @@ describe("town setup", () => {
     },
     {
       name: "右下側の街を先に配置",
-      action: {
+      move: {
         type: "extend-town" as const,
         player: "blue" as const,
         townId: "south-east" as const,
@@ -82,7 +85,7 @@ describe("town setup", () => {
     },
     {
       name: "道路を先に配置",
-      action: {
+      move: {
         type: "place-road" as const,
         player: "blue" as const,
         coordinate: { x: 6, y: 6 },
@@ -90,8 +93,10 @@ describe("town setup", () => {
       },
       reason: "wrong-phase",
     },
-  ])("$name を拒否する", ({ action, reason }) => {
-    expect(validateAction(createTownSetupGameState(), action)).toEqual({
+  ])("$name を拒否する", ({ move, reason }) => {
+    expect(
+      townConnectionGame.validateMove(createTownConnectionInitialState(), move),
+    ).toEqual({
       valid: false,
       reason,
     });

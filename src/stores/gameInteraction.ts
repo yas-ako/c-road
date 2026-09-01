@@ -3,7 +3,10 @@ import { computed, ref } from "vue";
 
 import { getCell } from "~/game/board";
 import { getRoadPlacementRule } from "~/game/rules/placement";
-import { getTownExtensionCandidates } from "~/game/rules/townPlacement";
+import {
+  getActiveTownId,
+  getTownExtensionCandidates,
+} from "~/game/rules/townPlacement";
 import type { TownId } from "~/game/types";
 import { useGameStore } from "~/stores/game";
 import { useGamePresentationStore } from "~/stores/gamePresentation";
@@ -15,11 +18,9 @@ export const useGameInteractionStore = defineStore("game-interaction", () => {
   const selectedCell = ref<[number, number]>([-1, -1]);
   const maxCellNumber = ref(10);
 
-  const activeTownId = computed<TownId | undefined>(() => {
-    if (game.state.phase === "placing-north-west-town") return "north-west";
-    if (game.state.phase === "placing-south-east-town") return "south-east";
-    return undefined;
-  });
+  const activeTownId = computed<TownId | undefined>(
+    () => getActiveTownId(game.state) ?? undefined,
+  );
 
   const townCandidates = computed(() =>
     activeTownId.value === undefined
@@ -32,7 +33,7 @@ export const useGameInteractionStore = defineStore("game-interaction", () => {
     return (
       x >= 0 &&
       y >= 0 &&
-      game.state.winResult === null &&
+      game.state.result === null &&
       game.state.phase === "placing-roads" &&
       !presentation.isBeingRemoved &&
       getCell(game.state.board, { x, y }).kind === "empty"
@@ -40,7 +41,7 @@ export const useGameInteractionStore = defineStore("game-interaction", () => {
   });
 
   function selectCell(x: number, y: number) {
-    if (presentation.isBeingRemoved || game.state.winResult !== null) return;
+    if (presentation.isBeingRemoved || game.state.result !== null) return;
 
     if (activeTownId.value !== undefined) {
       if (isTownCandidate(x, y)) {

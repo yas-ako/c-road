@@ -2,34 +2,78 @@ import { createEmptyBoard, setCell } from "./board";
 import {
   TOWN_ANCHORS,
   type Board,
+  type Coordinate,
   type PlayerColor,
-  type WinResult,
+  type TownId,
 } from "./types";
 
-export type GamePhase =
+export type TownRoadConnection = Readonly<{
+  townId: TownId;
+  roadCell: Coordinate;
+}>;
+
+export type TownConnectionWin = Readonly<{
+  type: "win";
+  condition: "town-connection";
+  winner: PlayerColor;
+  roadPath: readonly Coordinate[];
+  townConnections: readonly [TownRoadConnection, TownRoadConnection];
+}>;
+
+export type WindingCycleWin = Readonly<{
+  type: "win";
+  condition: "winding-cycle";
+  winner: PlayerColor;
+  roadCycle: readonly Coordinate[];
+  winding: Coordinate;
+}>;
+
+export type ResignationResult = Readonly<{
+  type: "win";
+  condition: "resignation";
+  winner: PlayerColor;
+  resignedPlayer: PlayerColor;
+}>;
+
+export type DrawResult = Readonly<{
+  type: "draw";
+  reason: "no-legal-moves";
+}>;
+
+export type GameResult =
+  | TownConnectionWin
+  | WindingCycleWin
+  | ResignationResult
+  | DrawResult;
+
+type SharedGameState = Readonly<{
+  board: Board;
+  currentPlayer: PlayerColor;
+  turn: number;
+}>;
+
+export type TownConnectionPhase =
   | "placing-north-west-town"
   | "placing-south-east-town"
   | "placing-roads";
 
-export type GameState = Readonly<{
-  board: Board;
-  phase: GamePhase;
-  currentPlayer: PlayerColor;
-  turn: number;
-  winResult: WinResult | null;
-}>;
+export type TownConnectionGameState = SharedGameState &
+  Readonly<{
+    mode: "town-connection";
+    phase: TownConnectionPhase;
+    result: TownConnectionWin | ResignationResult | DrawResult | null;
+  }>;
 
-export function createInitialGameState(): GameState {
-  return {
-    board: createEmptyBoard(),
-    phase: "placing-roads",
-    currentPlayer: "blue",
-    turn: 0,
-    winResult: null,
-  };
-}
+export type WindingCycleGameState = SharedGameState &
+  Readonly<{
+    mode: "winding-cycle";
+    phase: "placing-roads";
+    result: WindingCycleWin | ResignationResult | DrawResult | null;
+  }>;
 
-export function createTownSetupGameState(): GameState {
+export type GameState = TownConnectionGameState | WindingCycleGameState;
+
+export function createTownConnectionInitialState(): TownConnectionGameState {
   let board = createEmptyBoard();
   board = setCell(board, TOWN_ANCHORS["north-west"], {
     kind: "town",
@@ -41,11 +85,23 @@ export function createTownSetupGameState(): GameState {
   });
 
   return {
+    mode: "town-connection",
     board,
     phase: "placing-north-west-town",
     currentPlayer: "blue",
     turn: 0,
-    winResult: null,
+    result: null,
+  };
+}
+
+export function createWindingCycleInitialState(): WindingCycleGameState {
+  return {
+    mode: "winding-cycle",
+    board: createEmptyBoard(),
+    phase: "placing-roads",
+    currentPlayer: "blue",
+    turn: 0,
+    result: null,
   };
 }
 

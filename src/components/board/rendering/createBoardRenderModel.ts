@@ -2,13 +2,13 @@ import { getDisplayedTownConnections } from "~/components/board/townConnections"
 import { getTownOverlays } from "~/components/board/townOverlay";
 import { getCell } from "~/game/board";
 import { areRoadsConnected } from "~/game/rules/connectivity";
+import type { TownConnectionWin } from "~/game/state";
 import {
   DISPLAY_BOARD_SIZE,
   type Board,
   type Coordinate,
   type Direction,
   type PlayerColor,
-  type WinResult,
 } from "~/game/types";
 import { SVG_CELL_SIZE } from "./geometry";
 import type {
@@ -33,7 +33,7 @@ export type CreateBoardRenderModelOptions = Readonly<{
   selectedCell?: Coordinate;
   townCandidates?: readonly Coordinate[];
   currentPlayer?: PlayerColor;
-  winResult?: WinResult | null;
+  winResult?: TownConnectionWin | null;
 }>;
 
 function coordinateKey({ x, y }: Coordinate): string {
@@ -74,7 +74,9 @@ function logicalEdgeKey(first: Coordinate, second: Coordinate): string {
   return `${keys[0]}|${keys[1]}`;
 }
 
-function getWinningEdgeKeys(winResult: WinResult | null): ReadonlySet<string> {
+function getWinningEdgeKeys(
+  winResult: TownConnectionWin | null,
+): ReadonlySet<string> {
   const result = new Set<string>();
   if (winResult === null) return result;
 
@@ -96,7 +98,7 @@ function emphasis(isWinning: boolean, hasWinner: boolean): RenderEmphasis {
 
 function createRoads(
   board: Board,
-  winResult: WinResult | null,
+  winResult: TownConnectionWin | null,
 ): RenderedRoad[] {
   const winningRoadKeys = new Set(winResult?.roadPath.map(coordinateKey) ?? []);
   const roads: RenderedRoad[] = [];
@@ -127,7 +129,7 @@ function createRoads(
 
 function createRoadConnections(
   board: Board,
-  winResult: WinResult | null,
+  winResult: TownConnectionWin | null,
 ): RenderedConnection[] {
   const winningEdges = getWinningEdgeKeys(winResult);
   const connections: RenderedConnection[] = [];
@@ -176,7 +178,7 @@ function createRoadConnections(
 
 function createTownConnections(
   board: Board,
-  winResult: WinResult | null,
+  winResult: TownConnectionWin | null,
 ): RenderedConnection[] {
   return getDisplayedTownConnections(board).map((connection) => {
     const fromDisplay = {

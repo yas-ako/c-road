@@ -5,7 +5,8 @@ import {
   displayToLogicalCoordinate,
 } from "../../src/components/board/rendering/createBoardRenderModel";
 import { createEmptyBoard, setCell } from "../../src/game/board";
-import type { Board, WinResult } from "../../src/game/types";
+import type { TownConnectionWin } from "../../src/game/state";
+import type { Board } from "../../src/game/types";
 
 function addRoad(
   board: Board,
@@ -136,7 +137,9 @@ describe("board render model", () => {
       },
     );
     board = addRoad(board, 2, 1);
-    const winResult: WinResult = {
+    const winResult: TownConnectionWin = {
+      type: "win",
+      condition: "town-connection",
       winner: "blue",
       roadPath: [{ x: 2, y: 1 }],
       townConnections: [
@@ -159,7 +162,9 @@ describe("board render model", () => {
     board = addRoad(board, 4, 3);
     board = addRoad(board, 5, 3);
     board = addRoad(board, 4, 4);
-    const winResult: WinResult = {
+    const winResult: TownConnectionWin = {
+      type: "win",
+      condition: "town-connection",
       winner: "blue",
       roadPath: [
         { x: 3, y: 3 },

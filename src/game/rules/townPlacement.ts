@@ -9,6 +9,12 @@ const ORTHOGONAL_DIRECTIONS = [
   { x: 0, y: 1 },
 ] as const;
 
+export function getActiveTownId(state: GameState): TownId | null {
+  if (state.phase === "placing-north-west-town") return "north-west";
+  if (state.phase === "placing-south-east-town") return "south-east";
+  return null;
+}
+
 export function getTownExtensionCandidates(
   state: GameState,
   townId: TownId,

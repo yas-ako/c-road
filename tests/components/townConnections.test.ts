@@ -5,11 +5,11 @@ import {
   getDisplayedTownConnections,
 } from "../../src/components/board/townConnections";
 import { setCell } from "../../src/game/board";
-import { createTownSetupGameState } from "../../src/game/state";
+import { createTownConnectionInitialState } from "../../src/game/state";
 
 describe("town connections", () => {
   it("両方の街マスに隣接する道路には辺を共有する側から1本だけ接続する", () => {
-    let board = createTownSetupGameState().board;
+    let board = createTownConnectionInitialState().board;
     board = setCell(
       board,
       { x: 3, y: 2 },
@@ -42,7 +42,7 @@ describe("town connections", () => {
   });
 
   it("異なる道路は同じ街にそれぞれ1本ずつ接続する", () => {
-    let board = createTownSetupGameState().board;
+    let board = createTownConnectionInitialState().board;
     board = setCell(
       board,
       { x: 3, y: 2 },
