@@ -2,6 +2,7 @@ import { createPinia, setActivePinia } from "pinia";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { getCell, setCell } from "../../src/game/board";
+import type { GameEvent } from "../../src/game/moveTypes";
 import { useGameStore } from "../../src/stores/game";
 import { useGamePresentationStore } from "../../src/stores/gamePresentation";
 import { createTownRoadState } from "../helpers/gameState";
@@ -59,9 +60,24 @@ describe("game presentation store", () => {
 
   it("リセットで待機中の演出を破棄する", () => {
     const presentation = useGamePresentationStore();
-    presentation.present([]);
+    const events = [
+      {
+        type: "demolition",
+        boardBeforeDemolition: createTownRoadState().board,
+        removedCells: [{ x: 3, y: 6 }],
+      },
+    ] satisfies readonly GameEvent[];
+
+    presentation.present(events);
+    vi.advanceTimersByTime(1000);
 
     presentation.reset();
+    presentation.present(events);
+
+    vi.advanceTimersByTime(1000);
+    expect(presentation.isBeingRemoved).toBe(true);
+
+    vi.advanceTimersByTime(1000);
 
     expect(presentation.isBeingRemoved).toBe(false);
   });

@@ -4,6 +4,9 @@
       v-if="notification.isVisible"
       :key="notification.key"
       class="notification"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
     >
       <p class="heading">
         {{ notification.text[0] }}
@@ -18,48 +21,73 @@
       </div>
     </main>
     <aside class="control-panel">
-      <div v-if="visibleResult !== null" class="game-result" role="status">
-        <span class="game-result__label">{{ resultLabel }}</span>
-        <strong
-          v-if="visibleResult.type === 'win'"
-          :class="`game-result__winner--${visibleResult.winner}`"
-        >
-          {{ visibleResult.winner === "blue" ? "青" : "赤" }}の勝利
-        </strong>
-        <strong v-else>引き分け</strong>
-        <span class="game-result__description">{{ resultDescription }}</span>
+      <div v-if="game.state.result === null" class="game-actions">
         <button
           type="button"
-          class="game-result__restart"
-          @click="gameSession.reset"
+          class="game-actions__resign"
+          :disabled="presentation.isBeingRemoved"
+          @click="interaction.requestResignation"
         >
-          新しいゲーム
+          投了
         </button>
       </div>
-      <boardMenu v-else-if="game.state.phase === 'placing-roads'" />
-      <div v-else class="town-instruction">
-        <span class="town-instruction__turn">
-          {{
-            game.state.phase === "placing-north-west-town" ? "青の番" : "赤の番"
-          }}
-        </span>
-        <strong>街の向きを選んでください</strong>
-        <span>薄い灰色のマスを選択します</span>
+      <div class="control-panel__content">
+        <div v-if="visibleResult !== null" class="game-result" role="status">
+          <span class="game-result__label">{{ resultLabel }}</span>
+          <strong
+            v-if="visibleResult.type === 'win'"
+            :class="`game-result__winner--${visibleResult.winner}`"
+          >
+            {{ visibleResult.winner === "blue" ? "青" : "赤" }}の勝利
+          </strong>
+          <strong v-else>引き分け</strong>
+          <span class="game-result__description">{{ resultDescription }}</span>
+          <button
+            ref="restartButton"
+            type="button"
+            class="game-result__restart"
+            @click="gameSession.restart"
+          >
+            新しいゲーム
+          </button>
+        </div>
+        <boardMenu v-else-if="game.state.phase === 'placing-roads'" />
+        <div v-else class="town-instruction">
+          <span class="town-instruction__turn">
+            {{
+              game.state.phase === "placing-north-west-town"
+                ? "青の番"
+                : "赤の番"
+            }}
+          </span>
+          <strong>街の向きを選んでください</strong>
+          <span>薄い灰色のマスを選択します</span>
+        </div>
       </div>
     </aside>
   </section>
+  <BoardResignationDialog
+    :open="interaction.isResignationConfirmationOpen"
+    :current-player="interaction.resigningPlayer ?? game.state.currentPlayer"
+    @cancel="interaction.cancelResignation"
+    @confirm="interaction.confirmResignation"
+    @closed="focusResultAction"
+  />
 </template>
 
 <script setup lang="ts" scoped>
   import { useGameSession } from "~/composables/useGameSession";
+  import { useGameInteractionStore } from "~/stores/gameInteraction";
   import { useNotificationStore } from "~/stores/notification";
   import { useGameStore } from "~/stores/game";
   import { useGamePresentationStore } from "~/stores/gamePresentation";
 
   const game = useGameStore();
+  const interaction = useGameInteractionStore();
   const notification = useNotificationStore();
   const presentation = useGamePresentationStore();
   const gameSession = useGameSession();
+  const restartButton = useTemplateRef<HTMLButtonElement>("restartButton");
   const visibleResult = computed(() =>
     presentation.isBeingRemoved ? null : game.state.result,
   );
@@ -71,8 +99,15 @@
     if (result === null) return "";
     if (result.type === "draw") return "道を置けるマスがなくなりました";
     if (result.condition === "resignation") return "相手が投了しました";
-    return "2つの街を道路でつなぎました";
+    if (result.condition === "town-connection") {
+      return "2つの街を道路でつなぎました";
+    }
+    return "盤面を一周する道路を作りました";
   });
+
+  function focusResultAction() {
+    restartButton.value?.focus();
+  }
 </script>
 
 <style lang="scss" scoped>
@@ -109,7 +144,58 @@
   .control-panel {
     position: relative;
     z-index: 20;
+    display: flex;
     flex: none;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+
+    &__content {
+      flex: 1;
+      min-width: 0;
+      min-height: 0;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+    }
+  }
+
+  .game-actions {
+    display: flex;
+    flex: none;
+    justify-content: flex-end;
+    padding: 0.5rem max(0.75rem, env(safe-area-inset-right)) 0.5rem
+      max(0.75rem, env(safe-area-inset-left));
+    border-top: 1px solid rgb(226 232 240);
+    background: white;
+
+    &__resign {
+      min-width: 4.5rem;
+      min-height: 2.75rem;
+      padding: 0.5rem 1rem;
+      border: 1px solid rgb(203 213 225);
+      border-radius: 0.75rem;
+      color: rgb(71 85 105);
+      font-size: 0.875rem;
+      font-weight: 700;
+      background: white;
+
+      &:hover:not(:disabled) {
+        color: rgb(153 27 27);
+        border-color: rgb(252 165 165);
+        background: rgb(254 242 242);
+      }
+
+      &:focus-visible {
+        outline: 3px solid rgb(220 38 38 / 35%);
+        outline-offset: 2px;
+      }
+
+      &:disabled {
+        cursor: default;
+        color: rgb(148 163 184);
+        background: rgb(241 245 249);
+      }
+    }
   }
 
   .town-instruction {
@@ -205,11 +291,14 @@
     }
 
     .control-panel {
-      min-width: 0;
-      min-height: 0;
-      overflow-y: auto;
+      overflow: hidden;
       border-left: 1px solid rgb(226 232 240);
       background: white;
+    }
+
+    .game-actions {
+      border-top: 0;
+      border-bottom: 1px solid rgb(226 232 240);
     }
 
     .town-instruction {

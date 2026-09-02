@@ -33,6 +33,6 @@
 
   onBeforeUnmount(() => {
     window.removeEventListener("beforeunload", beforeUnloadHandler);
-    gameSession.reset();
+    gameSession.restart();
   });
 </script>

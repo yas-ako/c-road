@@ -25,5 +25,5 @@ export function useGameSession() {
     startGame(game.state.mode);
   }
 
-  return { startGame, restart, reset: restart };
+  return { startGame, restart };
 }
