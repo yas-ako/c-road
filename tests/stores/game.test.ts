@@ -2,7 +2,11 @@ import { createPinia, setActivePinia } from "pinia";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { getCell, setCell } from "../../src/game/board";
-import { createTownConnectionInitialState } from "../../src/game/state";
+import { createGameState, type GameMode } from "../../src/game/gameModes";
+import {
+  createTownConnectionInitialState,
+  createWindingCycleInitialState,
+} from "../../src/game/state";
 import { useGameStore } from "../../src/stores/game";
 import { createTownRoadState } from "../helpers/gameState";
 
@@ -40,6 +44,29 @@ describe("game store", () => {
     expect(game.state.currentPlayer).toBe("red");
   });
 
+  it("周回形式を開始して道を配置する", () => {
+    const game = useGameStore();
+
+    game.state = createWindingCycleInitialState();
+
+    expect(game.state).toEqual(createWindingCycleInitialState());
+    expect(game.placeRoad({ x: 3, y: 4 }, 1)).toEqual([]);
+    expect(getCell(game.state.board, { x: 3, y: 4 })).toEqual({
+      kind: "road",
+      color: "blue",
+      level: 1,
+    });
+  });
+
+  it("周回形式では街を配置しない", () => {
+    const game = useGameStore();
+    game.state = createWindingCycleInitialState();
+    const initial = game.state;
+
+    expect(game.extendTown("north-west", { x: 3, y: 2 })).toBe(false);
+    expect(game.state).toBe(initial);
+  });
+
   it("取り壊しを局面へ即時反映し、演出に必要なイベントを返す", () => {
     const game = useGameStore();
     const initial = createTownRoadState();
@@ -70,24 +97,19 @@ describe("game store", () => {
     });
   });
 
-  it("現在の手番のプレイヤーが投了する", () => {
-    const game = useGameStore();
+  it.each(["town-connection", "winding-cycle"] satisfies readonly GameMode[])(
+    "%s で現在の手番のプレイヤーが投了する",
+    (mode) => {
+      const game = useGameStore();
+      game.state = createGameState(mode);
 
-    expect(game.resign()).toBe(true);
-    expect(game.state.result).toEqual({
-      type: "win",
-      condition: "resignation",
-      winner: "red",
-      resignedPlayer: "blue",
-    });
-  });
-
-  it("リセットすると初期局面へ戻る", () => {
-    const game = useGameStore();
-    game.extendTown("north-west", { x: 3, y: 2 });
-
-    game.reset();
-
-    expect(game.state).toEqual(createTownConnectionInitialState());
-  });
+      expect(game.resign("blue")).toBe(true);
+      expect(game.state.result).toEqual({
+        type: "win",
+        condition: "resignation",
+        winner: "red",
+        resignedPlayer: "blue",
+      });
+    },
+  );
 });

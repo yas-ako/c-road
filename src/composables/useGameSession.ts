@@ -1,3 +1,4 @@
+import { createGameState, type GameMode } from "~/game/gameModes";
 import { useGameStore } from "~/stores/game";
 import { useGameInteractionStore } from "~/stores/gameInteraction";
 import { useGamePresentationStore } from "~/stores/gamePresentation";
@@ -9,12 +10,20 @@ export function useGameSession() {
   const presentation = useGamePresentationStore();
   const notification = useNotificationStore();
 
-  function reset() {
+  function resetUi() {
     presentation.reset();
     interaction.reset();
     notification.reset();
-    game.reset();
   }
 
-  return { reset };
+  function startGame(mode: GameMode) {
+    resetUi();
+    game.state = createGameState(mode);
+  }
+
+  function restart() {
+    startGame(game.state.mode);
+  }
+
+  return { startGame, restart, reset: restart };
 }
